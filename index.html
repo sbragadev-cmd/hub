@@ -1,785 +1,1694 @@
 <!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Hub — Painel Público</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hub Regenera — Perfil da CRGR</title>
 
-  <style>
-    /* Efeitos extras (sem libs) */
-    .glow {
-      box-shadow: 0 10px 30px rgba(16,185,129,.18), 0 6px 18px rgba(59,130,246,.12);
-    }
-    .card-tilt:hover { transform: translateY(-4px) rotate(-0.2deg); }
-    .soft-shadow { box-shadow: 0 10px 30px rgba(2,6,23,.08); }
-    .shine {
-      position: relative; overflow: hidden;
-    }
-    .shine:before {
-      content:""; position:absolute; inset:-50%;
-      background: linear-gradient(120deg, transparent 40%, rgba(255,255,255,.45) 50%, transparent 60%);
-      transform: translateX(-60%) rotate(10deg);
-      transition: transform .8s ease;
-      pointer-events: none;
-    }
-    .shine:hover:before { transform: translateX(10%) rotate(10deg); }
-    .blob {
-      filter: blur(30px);
-      opacity: .75;
-      transform: translateZ(0);
-      animation: floaty 8s ease-in-out infinite;
-    }
-    @keyframes floaty {
-      0%,100% { transform: translate(0,0) scale(1); }
-      50% { transform: translate(20px,-18px) scale(1.05); }
-    }
-    .fade-in { animation: fadeIn .35s ease both; }
-    @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0);} }
-  </style>
-</head>
+    <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-<body class="bg-slate-950 text-slate-100">
-  <!-- BACKGROUND DECOR -->
-  <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-    <div class="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-emerald-500 blob"></div>
-    <div class="absolute top-20 -right-20 h-80 w-80 rounded-full bg-sky-500 blob" style="animation-delay:1.2s"></div>
-    <div class="absolute bottom-[-60px] left-1/3 h-72 w-72 rounded-full bg-fuchsia-500 blob" style="animation-delay:2.2s"></div>
-    <div class="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-950/95 to-slate-950"></div>
-  </div>
+    <!-- Paleta do projeto (Tailwind config) -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              regen: {
+                green: "#1B7F5A", // Verde Regeneração
+                greenLight: "#4CAF8F", // Verde Claro
+                blue: "#0D3B66", // Azul Profundo
+                yellow: "#F2C94C", // Amarelo Energia
+                graphite: "#2E2E2E", // Cinza Grafite
+                bg: "#F5F7F6", // Cinza Claro (fundo)
+              },
+            },
+            boxShadow: {
+              soft: "0 12px 30px rgba(13, 59, 102, 0.10)",
+              glow: "0 14px 40px rgba(27, 127, 90, 0.18)",
+            },
+            borderRadius: {
+              xl2: "1.25rem",
+            },
+            keyframes: {
+              floaty: { "0%,100%": { transform: "translateY(0px)" }, "50%": { transform: "translateY(-6px)" } },
+              fadeUp: { "0%": { opacity: 0, transform: "translateY(8px)" }, "100%": { opacity: 1, transform: "translateY(0px)" } },
+            },
+            animation: {
+              floaty: "floaty 6s ease-in-out infinite",
+              fadeUp: "fadeUp .35s ease-out both",
+            },
+          },
+        },
+      };
+    </script>
 
-  <!-- HEADER -->
-  <header class="sticky top-0 z-40 border-b border-white/10 bg-slate-950/65 backdrop-blur">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
-      <div class="flex items-center gap-3">
-        <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-400 via-sky-400 to-fuchsia-400 glow"></div>
-        <div class="leading-tight">
-          <div class="font-semibold tracking-wide">Hub Resiliência Climática</div>
-          <div class="text-xs text-slate-300">Conteúdos • Notícias • Territórios</div>
-        </div>
-      </div>
+    <!-- Leaflet (Mapa) -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+      defer
+    ></script>
 
-      <div class="flex-1"></div>
+    <style>
+      #map {
+        min-height: 440px;
+      }
+      /* scrollbar elegante */
+      .nice-scroll::-webkit-scrollbar {
+        width: 10px;
+      }
+      .nice-scroll::-webkit-scrollbar-thumb {
+        background: rgba(13, 59, 102, 0.18);
+        border-radius: 999px;
+        border: 2px solid rgba(245, 247, 246, 1);
+      }
+      .nice-scroll::-webkit-scrollbar-track {
+        background: rgba(245, 247, 246, 1);
+      }
+    </style>
+  </head>
 
-      <nav class="hidden md:flex items-center gap-2 text-sm text-slate-200">
-        <button class="px-3 py-2 rounded-xl hover:bg-white/10" data-nav="conteudos">📚 Conteúdos</button>
-        <button class="px-3 py-2 rounded-xl hover:bg-white/10" data-nav="noticias">📰 Notícias</button>
-        <button class="px-3 py-2 rounded-xl hover:bg-white/10" data-nav="territorios">🗺️ Territórios</button>
-        <button class="px-3 py-2 rounded-xl hover:bg-white/10" data-nav="sobre">✨ Sobre</button>
-      </nav>
-
-      <button class="ml-2 px-4 py-2 rounded-xl bg-white text-slate-950 font-semibold text-sm hover:bg-slate-100">
-        Entrar
-      </button>
-    </div>
-  </header>
-
-  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-    <!-- HERO -->
-    <section class="rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 soft-shadow overflow-hidden relative">
-      <div class="absolute inset-0 opacity-25">
-        <!-- pattern -->
-        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="p" width="60" height="60" patternUnits="userSpaceOnUse">
-              <circle cx="10" cy="10" r="1.5" fill="white" opacity=".35"/>
-              <circle cx="40" cy="30" r="1.5" fill="white" opacity=".25"/>
-              <circle cx="25" cy="50" r="1.5" fill="white" opacity=".2"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#p)"/>
-        </svg>
-      </div>
-
-      <div class="relative p-5 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
-        <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs text-slate-200">
-            <span>🌱</span> Plataforma pública • Acesse agora
+  <body class="bg-regen-bg text-regen-graphite">
+    <!-- Topbar -->
+    <header class="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur">
+      <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <div class="h-10 w-10 rounded-2xl bg-regen-blue text-white grid place-items-center font-semibold shadow-soft">
+              HR
+            </div>
+            <div class="absolute -right-1 -bottom-1 h-4 w-4 rounded-full bg-regen-yellow border-2 border-white"></div>
           </div>
-          <h1 class="mt-3 text-2xl md:text-4xl font-extrabold leading-tight">
-            Um painel vivo do território:
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-sky-300 to-fuchsia-300">
-              conteúdos, notícias e ações
-            </span>
-            para mobilizar a comunidade.
-          </h1>
-          <p class="mt-3 text-slate-200/90">
-            Descubra materiais práticos, acompanhe comunicados e veja o que está acontecendo em cada território.
-          </p>
+          <div class="leading-tight">
+            <div class="text-sm font-semibold text-regen-blue">Hub Regenera</div>
+            <div class="text-xs text-slate-500">Perfil da CRGR</div>
+          </div>
+        </div>
 
-          <div class="mt-5 flex flex-wrap gap-3">
-            <button id="ctaExplore" class="shine px-5 py-3 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100">
-              🚀 Explorar agora
+        <div class="flex items-center gap-2">
+          <!-- Dropdown cooperativas -->
+          <div class="relative">
+            <button
+              id="btnCooperativas"
+              class="px-3 py-2 rounded-xl border border-slate-200 text-sm hover:bg-regen-bg inline-flex items-center gap-2 shadow-sm"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              <span class="inline-flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-regen-green"></span>
+                <span id="topbarCrgrShort" class="font-semibold text-regen-blue">Cooperativas</span>
+              </span>
+              <span class="text-slate-500">▾</span>
             </button>
-            <button id="ctaNews" class="px-5 py-3 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/15">
-              📰 Ver notícias
-            </button>
-            <button id="ctaTerr" class="px-5 py-3 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/15">
-              🗺️ Ver territórios
-            </button>
-          </div>
 
-          <div class="mt-5 grid grid-cols-3 gap-3">
-            <div class="rounded-2xl bg-white/10 border border-white/10 p-3">
-              <div class="text-xs text-slate-300">Atualizações</div>
-              <div class="text-lg font-bold" id="kpiAtualizacoes">—</div>
-              <div class="text-xs text-slate-300">no período</div>
-            </div>
-            <div class="rounded-2xl bg-white/10 border border-white/10 p-3">
-              <div class="text-xs text-slate-300">Conteúdos</div>
-              <div class="text-lg font-bold" id="kpiConteudos">—</div>
-              <div class="text-xs text-slate-300">disponíveis</div>
-            </div>
-            <div class="rounded-2xl bg-white/10 border border-white/10 p-3">
-              <div class="text-xs text-slate-300">Territórios</div>
-              <div class="text-lg font-bold" id="kpiTerritorios">—</div>
-              <div class="text-xs text-slate-300">ativos</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right illustration + images -->
-        <div class="relative">
-          <div class="grid grid-cols-2 gap-3">
-            <div class="rounded-3xl overflow-hidden border border-white/10 bg-white/5 soft-shadow card-tilt transition">
-              <img class="h-44 w-full object-cover"
-                src="https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1200&q=70"
-                alt="Comunidade" />
-              <div class="p-3">
-                <div class="text-xs text-slate-300">📣 Mobilização</div>
-                <div class="font-semibold">Ações coletivas</div>
+            <div
+              id="cooperativasMenu"
+              class="hidden absolute right-0 mt-2 w-[22rem] bg-white border border-slate-200 rounded-2xl shadow-soft overflow-hidden"
+              role="menu"
+            >
+              <div class="px-4 py-3 text-xs font-semibold text-slate-500 bg-regen-bg border-b border-slate-200">
+                Selecionar CRGR
               </div>
-            </div>
-
-            <div class="rounded-3xl overflow-hidden border border-white/10 bg-white/5 soft-shadow card-tilt transition" style="transition-duration:.25s">
-              <img class="h-44 w-full object-cover"
-                src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=70"
-                alt="Território" />
-              <div class="p-3">
-                <div class="text-xs text-slate-300">🗺️ Território</div>
-                <div class="font-semibold">Mapeamento</div>
-              </div>
-            </div>
-
-            <div class="col-span-2 rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-br from-emerald-500/20 via-sky-500/15 to-fuchsia-500/20 soft-shadow shine">
-              <div class="p-4 flex items-center justify-between gap-3">
-                <div>
-                  <div class="text-xs text-slate-200">⚡ Destaque</div>
-                  <div class="text-lg font-bold">Acesse materiais prontos para usar</div>
-                  <div class="text-sm text-slate-200/90">cartilhas, vídeos, checklists e comunicados</div>
-                </div>
-                <div class="hidden sm:flex items-center gap-2">
-                  <span class="px-3 py-2 rounded-2xl bg-white/10 border border-white/10">📄</span>
-                  <span class="px-3 py-2 rounded-2xl bg-white/10 border border-white/10">🎥</span>
-                  <span class="px-3 py-2 rounded-2xl bg-white/10 border border-white/10">✅</span>
-                  <span class="px-3 py-2 rounded-2xl bg-white/10 border border-white/10">📢</span>
-                </div>
-              </div>
+              <div id="cooperativasList" class="p-2"></div>
             </div>
           </div>
 
-          <div class="absolute -bottom-4 -right-4 hidden lg:block">
-            <div class="rounded-3xl bg-white/10 border border-white/10 p-3 soft-shadow">
-              <div class="text-xs text-slate-200">✨ Dica</div>
-              <div class="text-sm text-slate-200/90">Use os filtros para achar conteúdos por tema e território.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- FILTER + SEARCH -->
-    <section class="rounded-3xl border border-white/10 bg-white/5 soft-shadow p-4 md:p-6">
-      <div class="flex flex-col md:flex-row gap-3 md:items-end">
-        <div class="flex-1">
-          <div class="text-sm text-slate-200 font-semibold">🔎 Buscar e filtrar</div>
-          <div class="text-xs text-slate-300">Encontre conteúdos e notícias por tema, território e período.</div>
-        </div>
-
-        <div class="w-full md:w-[460px]">
-          <div class="flex items-center gap-2 bg-slate-900/60 border border-white/10 rounded-2xl px-3 py-2">
-            <span class="text-slate-300">🔍</span>
-            <input id="q" class="w-full bg-transparent outline-none text-sm text-slate-100 placeholder:text-slate-400"
-              placeholder="Buscar conteúdo, notícia, tema..." />
-            <button id="clearQ" class="text-xs px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15">Limpar</button>
-          </div>
-          <div id="hint" class="mt-2 text-xs text-slate-300 hidden"></div>
-        </div>
-      </div>
-
-      <div class="mt-5 grid grid-cols-1 md:grid-cols-5 gap-3">
-        <div>
-          <label class="text-xs text-slate-300">Território</label>
-          <select id="fTerritorio" class="mt-1 w-full text-sm bg-slate-900/60 border border-white/10 rounded-2xl px-3 py-2">
-            <option value="">Todos</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-xs text-slate-300">Tema</label>
-          <select id="fTema" class="mt-1 w-full text-sm bg-slate-900/60 border border-white/10 rounded-2xl px-3 py-2">
-            <option value="">Todos</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-xs text-slate-300">Tipo</label>
-          <select id="fTipo" class="mt-1 w-full text-sm bg-slate-900/60 border border-white/10 rounded-2xl px-3 py-2">
-            <option value="">Todos</option>
-            <option value="Conteúdo">Conteúdo</option>
-            <option value="Notícia">Notícia</option>
-            <option value="Evento">Evento</option>
-            <option value="Comunicado">Comunicado</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-xs text-slate-300">Período</label>
-          <select id="fPeriodo" class="mt-1 w-full text-sm bg-slate-900/60 border border-white/10 rounded-2xl px-3 py-2">
-            <option value="all">Tudo</option>
-            <option value="7">Últimos 7 dias</option>
-            <option value="30">Últimos 30 dias</option>
-            <option value="90">Últimos 90 dias</option>
-          </select>
-        </div>
-        <div class="flex items-end gap-2">
-          <button id="btnReset" class="w-full text-sm px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100">
-            🧹 Limpar
+          <button
+            class="px-3 py-2 rounded-xl border border-slate-200 text-sm hover:bg-regen-bg shadow-sm"
+            title="Perfil"
+          >
+            Perfil 👤
           </button>
         </div>
       </div>
-    </section>
+    </header>
 
-    <!-- MAIN GRID -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <!-- LEFT -->
-      <div class="lg:col-span-2 space-y-4" id="conteudosSection">
-        <!-- KPIs -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow">
-            <div class="text-xs text-slate-300">📰 Notícias (período)</div>
-            <div id="kpiNoticias" class="text-2xl font-extrabold mt-1">0</div>
-            <div class="text-xs text-slate-300 mt-1">publicadas</div>
-          </div>
-          <div class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow">
-            <div class="text-xs text-slate-300">📚 Conteúdos</div>
-            <div id="kpiConteudos2" class="text-2xl font-extrabold mt-1">0</div>
-            <div class="text-xs text-slate-300 mt-1">disponíveis</div>
-          </div>
-          <div class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow">
-            <div class="text-xs text-slate-300">🗺️ Territórios</div>
-            <div id="kpiTerritorios2" class="text-2xl font-extrabold mt-1">0</div>
-            <div class="text-xs text-slate-300 mt-1">ativos</div>
-          </div>
-          <div class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow">
-            <div class="text-xs text-slate-300">📅 Eventos (período)</div>
-            <div id="kpiEventos" class="text-2xl font-extrabold mt-1">0</div>
-            <div class="text-xs text-slate-300 mt-1">agendados</div>
-          </div>
-        </div>
+    <div class="mx-auto max-w-7xl px-4 py-6 grid grid-cols-12 gap-6">
+      <!-- Sidebar -->
+      <aside class="col-span-12 lg:col-span-3">
+        <nav class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
+          <div class="px-3 py-2 text-xs font-semibold text-slate-500">MENU</div>
 
-        <!-- Featured -->
-        <div class="rounded-3xl border border-white/10 bg-white/5 soft-shadow p-4 md:p-6">
-          <div class="flex items-center justify-between gap-3">
-            <div>
-              <div class="font-semibold text-lg">✨ Conteúdos em destaque</div>
-              <div class="text-sm text-slate-300">Escolhas rápidas para começar agora.</div>
+          <a class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-regen-bg text-sm" href="#">
+            <span>🏠</span> <span>Painel inicial</span>
+          </a>
+          <a class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-regen-bg text-sm" href="conteudo.html">
+            <span>📚</span> <span>Conteúdos</span>
+          </a>
+          <a class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-regen-bg text-sm" href="#">
+            <span>🧭</span> <span>Trilhas formativas</span>
+          </a>
+          <a class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-regen-bg text-sm" href="#">
+            <span>🗺️</span> <span>Território</span>
+          </a>
+          <a class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-regen-bg text-sm" href="#">
+            <span>📄</span> <span>Documentos</span>
+          </a>
+          <a class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-regen-bg text-sm" href="#">
+            <span>💬</span> <span>Fale com o Hub</span>
+          </a>
+
+          <div class="mt-3 border-t border-slate-200 pt-3 px-3">
+            <div class="text-xs font-semibold text-slate-500">CRGR ATUAL</div>
+            <div id="sidebarCrgrName" class="mt-1 text-sm font-semibold text-regen-blue">—</div>
+            <div id="sidebarCrgrAddr" class="mt-1 text-xs text-slate-600">—</div>
+
+            <div class="mt-3 rounded-2xl bg-regen-bg border border-slate-200 p-3">
+              <div class="text-xs font-semibold text-slate-500">STATUS</div>
+              <div class="mt-2 flex items-center justify-between gap-2">
+                <span id="sidebarStatus" class="text-sm font-semibold">—</span>
+                <span class="text-xs px-2 py-1 rounded-lg bg-white border border-slate-200">Live</span>
+              </div>
+              <div class="mt-2 text-xs text-slate-600">
+                Atualize comunicados e agenda para manter o território informado.
+              </div>
             </div>
-            <button id="toggleView" class="px-4 py-2 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/15 text-sm">
-              🔁 Alternar grade/lista
+          </div>
+        </nav>
+
+        <!-- Mini dashboard (demo) -->
+        <section class="mt-6 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-semibold text-regen-blue">Dashboard CRGR</h3>
+              <p class="text-xs text-slate-600">Indicadores (demo)</p>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-lg bg-regen-yellow/25 border border-regen-yellow text-regen-graphite">
+              Insights
+            </span>
+          </div>
+
+          <div class="mt-4 grid grid-cols-2 gap-3">
+            <div class="p-3 rounded-xl border border-slate-200 bg-regen-bg">
+              <div class="text-xs text-slate-500">Usuários</div>
+              <div id="kpiUsers" class="text-lg font-semibold text-regen-blue">0</div>
+            </div>
+            <div class="p-3 rounded-xl border border-slate-200 bg-regen-bg">
+              <div class="text-xs text-slate-500">Inscrições (especial)</div>
+              <div id="kpiSpecial" class="text-lg font-semibold text-regen-blue">0</div>
+            </div>
+            <div class="p-3 rounded-xl border border-slate-200 bg-regen-bg">
+              <div class="text-xs text-slate-500">Chamados abertos</div>
+              <div id="kpiTickets" class="text-lg font-semibold text-regen-blue">0</div>
+            </div>
+            <div class="p-3 rounded-xl border border-slate-200 bg-regen-bg">
+              <div class="text-xs text-slate-500">Treinamentos</div>
+              <div id="kpiTrainings" class="text-lg font-semibold text-regen-blue">0</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Card destaque -->
+        <section class="mt-6 rounded-2xl p-4 shadow-glow text-white overflow-hidden relative bg-regen-green">
+          <div class="absolute inset-0 opacity-20">
+            <div class="absolute -top-20 -left-20 h-56 w-56 rounded-full bg-white/30 blur-2xl"></div>
+            <div class="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-regen-yellow/70 blur-2xl"></div>
+          </div>
+          <div class="relative">
+            <div class="text-xs font-semibold uppercase tracking-wide">Dica do Hub</div>
+            <div class="mt-2 text-base font-semibold">Resíduos secos = limpos e secos</div>
+            <p class="mt-1 text-sm text-white/90">
+              Separar corretamente reduz rejeitos e aumenta renda das cooperativas.
+            </p>
+            <button
+              data-open-tab="tab-services"
+              class="mt-3 w-full px-3 py-2 rounded-xl bg-white/15 border border-white/25 text-sm hover:bg-white/20"
+            >
+              Ver materiais aceitos
             </button>
           </div>
-          <div id="featured" class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3"></div>
-        </div>
-
-        <!-- Library -->
-        <div class="rounded-3xl border border-white/10 bg-white/5 soft-shadow p-4 md:p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="font-semibold text-lg">📦 Biblioteca</div>
-              <div class="text-sm text-slate-300">Filtrada por seus critérios.</div>
-            </div>
-            <div class="text-xs text-slate-300">Resultados: <span id="countResults">0</span></div>
-          </div>
-          <div id="results" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-        </div>
-      </div>
-
-      <!-- RIGHT -->
-      <aside class="space-y-4">
-        <!-- News -->
-        <div class="rounded-3xl border border-white/10 bg-white/5 soft-shadow p-4 md:p-6" id="noticiasSection">
-          <div class="flex items-center justify-between">
-            <div class="font-semibold text-lg">📰 Notícias</div>
-            <span class="text-xs text-slate-300">Atualizações</span>
-          </div>
-          <div id="news" class="mt-4 space-y-3"></div>
-        </div>
-
-        <!-- Territories -->
-        <div class="rounded-3xl border border-white/10 bg-white/5 soft-shadow p-4 md:p-6" id="territoriosSection">
-          <div class="flex items-center justify-between">
-            <div class="font-semibold text-lg">🗺️ Territórios</div>
-            <span class="text-xs text-slate-300">Clique para filtrar</span>
-          </div>
-          <div id="territorios" class="mt-4 space-y-2"></div>
-        </div>
-
-        <!-- Events -->
-        <div class="rounded-3xl border border-white/10 bg-white/5 soft-shadow p-4 md:p-6">
-          <div class="flex items-center justify-between">
-            <div class="font-semibold text-lg">📅 Próximos eventos</div>
-            <span class="text-xs text-slate-300">Agenda</span>
-          </div>
-          <div id="events" class="mt-4 space-y-3"></div>
-        </div>
+        </section>
       </aside>
-    </section>
 
-    <footer class="py-10 text-center text-sm text-slate-300/80">
-      ✨ Hub • Área pública • Conteúdos, notícias e territórios
-    </footer>
-  </main>
-
-  <!-- MODAL -->
-  <div id="modal" class="fixed inset-0 hidden z-50">
-    <div class="absolute inset-0 bg-black/60"></div>
-    <div class="relative max-w-2xl mx-auto mt-12 bg-slate-950 border border-white/10 rounded-3xl soft-shadow overflow-hidden fade-in">
-      <div class="p-4 border-b border-white/10 flex items-start justify-between gap-3">
-        <div>
-          <div id="modalType" class="text-xs text-slate-300"></div>
-          <div id="modalTitle" class="text-lg md:text-xl font-extrabold"></div>
-          <div id="modalMeta" class="text-xs text-slate-300 mt-1"></div>
-        </div>
-        <button id="modalClose" class="px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold text-sm hover:bg-slate-100">Fechar</button>
-      </div>
-      <div class="p-4">
-        <div id="modalBody" class="text-sm text-slate-200 leading-relaxed"></div>
-        <div id="modalActions" class="mt-4 flex flex-wrap gap-2"></div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // ---------- MOCK DATA ----------
-    const territorios = [
-      { id: "porto-alegre", nome: "Porto Alegre", status: "Ações ativas", updatedAt: "2026-02-08", icon:"🏙️" },
-      { id: "canoas", nome: "Canoas", status: "Comunicados", updatedAt: "2026-02-06", icon:"🚲" },
-      { id: "gravatai", nome: "Gravataí", status: "Trilhas em curso", updatedAt: "2026-02-03", icon:"🌿" },
-      { id: "viamao", nome: "Viamão", status: "Ações ativas", updatedAt: "2026-01-28", icon:"🏞️" },
-    ];
-
-    const itens = [
-      // Conteúdos
-      {
-        id: "c1", tipo: "Conteúdo", subTipo: "📄 Cartilha (PDF)",
-        titulo: "Guia rápido: Gestão de Resíduos em Comunidades",
-        tema: "Resíduos", territorio: "Porto Alegre", publico: "Comunidade",
-        data: "2026-02-07", destaque: true,
-        resumo: "Passo a passo para organizar coleta, triagem e comunicação local.",
-        url: "#",
-        img: "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?auto=format&fit=crop&w=1200&q=70"
-      },
-      {
-        id: "c2", tipo: "Conteúdo", subTipo: "🎥 Vídeo",
-        titulo: "Introdução à Resiliência Climática no Território",
-        tema: "Clima", territorio: "Canoas", publico: "Geral",
-        data: "2026-02-02", destaque: true,
-        resumo: "Conceitos essenciais e exemplos práticos de adaptação comunitária.",
-        url: "#",
-        img: "https://images.unsplash.com/photo-1508780709619-79562169bc64?auto=format&fit=crop&w=1200&q=70"
-      },
-      {
-        id: "c3", tipo: "Conteúdo", subTipo: "✅ Checklist",
-        titulo: "Checklist de Comunicação de Risco para Lideranças",
-        tema: "Risco", territorio: "Gravataí", publico: "Liderança",
-        data: "2026-01-25", destaque: true,
-        resumo: "Modelo simples para avisos, fluxos de informação e pontos de apoio.",
-        url: "#",
-        img: "https://images.unsplash.com/photo-1526948128573-703ee1aeb6fa?auto=format&fit=crop&w=1200&q=70"
-      },
-      { id:"c4", tipo:"Conteúdo", subTipo:"📄 Cartilha (PDF)", titulo:"Educação Ambiental: oficinas rápidas (roteiros)",
-        tema:"Educação", territorio:"Viamão", publico:"Técnico", data:"2026-01-18", destaque:false,
-        resumo:"Roteiros práticos para oficinas com jovens e adultos.", url:"#",
-        img:"https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=70"
-      },
-
-      // Notícias
-      { id:"n1", tipo:"Notícia", titulo:"Mutirão no território: coleta seletiva e sensibilização",
-        tema:"Resíduos", territorio:"Porto Alegre", data:"2026-02-09", destaque:true,
-        resumo:"Ação reuniu moradores e lideranças com foco em triagem e descarte correto.",
-        corpo:"Aqui entra o texto completo da notícia (com fotos, links e materiais relacionados).",
-        img:"https://images.unsplash.com/photo-1520975661595-6453be3f7070?auto=format&fit=crop&w=1200&q=70"
-      },
-      { id:"n2", tipo:"Notícia", titulo:"Formação: trilha de resíduos inicia com 3 módulos",
-        tema:"Formação", territorio:"Canoas", data:"2026-02-04", destaque:false,
-        resumo:"Participantes iniciaram o módulo de base sobre gestão comunitária.",
-        corpo:"Conteúdo completo da notícia: programação, objetivos, materiais e próximos passos.",
-        img:"https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=70"
-      },
-
-      // Eventos
-      { id:"e1", tipo:"Evento", titulo:"Roda de conversa: riscos climáticos no território",
-        tema:"Risco", territorio:"Gravataí", data:"2026-02-20",
-        resumo:"Encontro aberto para mapear riscos e ações coletivas.", local:"Online" },
-      { id:"e2", tipo:"Evento", titulo:"Oficina prática: triagem e separação de resíduos",
-        tema:"Resíduos", territorio:"Porto Alegre", data:"2026-02-27",
-        resumo:"Demonstração com exemplos do cotidiano e materiais acessíveis.", local:"Presencial" },
-
-      // Comunicados
-      { id:"m1", tipo:"Comunicado", titulo:"Comunicado do Hub: atualização de materiais",
-        tema:"Institucional", territorio:"Todos", data:"2026-02-01",
-        resumo:"Novos PDFs e guias foram adicionados à biblioteca pública." }
-    ];
-
-    // ---------- HELPERS ----------
-    const $ = (id) => document.getElementById(id);
-    const parseDateISO = (s) => new Date(s + "T00:00:00");
-    const daysBetween = (a,b)=> Math.floor((a-b)/(1000*60*60*24));
-    const uniqueSorted = (arr)=> [...new Set(arr)].sort((a,b)=>a.localeCompare(b,"pt-BR"));
-
-    const themeBadge = (tema) => {
-      const map = {
-        "Resíduos": "bg-amber-400/15 text-amber-200 border-amber-300/20",
-        "Clima": "bg-sky-400/15 text-sky-200 border-sky-300/20",
-        "Risco": "bg-fuchsia-400/15 text-fuchsia-200 border-fuchsia-300/20",
-        "Educação": "bg-emerald-400/15 text-emerald-200 border-emerald-300/20",
-        "Formação": "bg-indigo-400/15 text-indigo-200 border-indigo-300/20",
-        "Institucional": "bg-slate-400/15 text-slate-200 border-slate-300/20",
-      };
-      const cls = map[tema] || "bg-white/10 text-slate-200 border-white/10";
-      return `<span class="inline-flex items-center text-xs px-2 py-1 rounded-xl border ${cls}">${tema}</span>`;
-    };
-
-    const pill = (txt)=> `<span class="text-xs px-2 py-1 rounded-xl bg-white/10 border border-white/10 text-slate-200">${txt}</span>`;
-
-    const formatDate = (iso)=> parseDateISO(iso).toLocaleDateString("pt-BR",{day:"2-digit",month:"short",year:"numeric"});
-
-    const withinPeriod = (dateISO, period)=>{
-      if(period==="all") return true;
-      const now = new Date();
-      const d = parseDateISO(dateISO);
-      return daysBetween(now, d) <= Number(period);
-    };
-
-    // ---------- STATE ----------
-    const state = { q:"", territorio:"", tema:"", tipo:"", periodo:"all", view:"grid" };
-
-    // ---------- INIT FILTERS ----------
-    function initFilters(){
-      uniqueSorted(territorios.map(t=>t.nome)).forEach(t=>{
-        const opt = document.createElement("option"); opt.value=t; opt.textContent=t;
-        $("fTerritorio").appendChild(opt);
-      });
-      uniqueSorted(itens.map(i=>i.tema).filter(Boolean)).forEach(tm=>{
-        const opt = document.createElement("option"); opt.value=tm; opt.textContent=tm;
-        $("fTema").appendChild(opt);
-      });
-    }
-
-    function filtered(){
-      const q = state.q.trim().toLowerCase();
-      return itens.filter(i=>{
-        const matchQ = !q || [i.titulo,i.resumo,i.tema,i.territorio].some(v=>(v||"").toLowerCase().includes(q));
-        const matchTerr = !state.territorio || i.territorio===state.territorio || i.territorio==="Todos";
-        const matchTema = !state.tema || i.tema===state.tema;
-        const matchTipo = !state.tipo || i.tipo===state.tipo;
-        const matchPeriodo = withinPeriod(i.data, state.periodo);
-        return matchQ && matchTerr && matchTema && matchTipo && matchPeriodo;
-      });
-    }
-
-    // ---------- CARDS ----------
-    function card(i){
-      const img = i.img ? `
-        <div class="relative h-32 rounded-2xl overflow-hidden border border-white/10">
-          <img src="${i.img}" class="h-full w-full object-cover scale-[1.02] hover:scale-[1.08] transition duration-500" alt="">
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent"></div>
-          <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-            <div class="text-xs text-slate-200">${i.subTipo || i.tipo}</div>
-            ${themeBadge(i.tema)}
+      <!-- Main -->
+      <main class="col-span-12 lg:col-span-9">
+        <!-- Hero CRGR -->
+        <section class="relative overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-soft">
+          <div class="absolute inset-0">
+            <div class="absolute -top-16 -right-16 h-64 w-64 rounded-full bg-regen-greenLight/25 blur-3xl"></div>
+            <div class="absolute -bottom-20 -left-10 h-72 w-72 rounded-full bg-regen-blue/20 blur-3xl"></div>
           </div>
-        </div>
-      ` : `
-        <div class="flex items-center justify-between">
-          <div class="text-xs text-slate-300">${i.subTipo || i.tipo}</div>
-          ${themeBadge(i.tema)}
-        </div>
-      `;
 
-      return `
-        <article class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow shine card-tilt transition">
-          ${img}
-          <h3 class="mt-3 font-extrabold leading-snug">${i.titulo}</h3>
-          <p class="mt-1 text-sm text-slate-200/90">${i.resumo || ""}</p>
-          <div class="mt-3 flex flex-wrap gap-2">
-            ${pill("🗺️ " + (i.territorio||"—"))}
-            ${pill("🗓️ " + formatDate(i.data))}
-            ${i.publico ? pill("👥 " + i.publico) : ""}
-          </div>
-          <div class="mt-4 flex gap-2">
-            <button class="open-item px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100 text-sm" data-id="${i.id}">
-              Abrir
-            </button>
-            <button class="copy-link px-4 py-2 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/15 text-sm" data-id="${i.id}">
-              Copiar link
-            </button>
-          </div>
-        </article>
-      `;
-    }
+          <div class="relative p-5">
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h1 id="crgrName" class="text-xl md:text-2xl font-semibold text-regen-blue">CRGR —</h1>
+                  <span id="crgrStatusPill" class="text-xs px-2 py-1 rounded-lg border bg-white/70 border-slate-200">
+                    —
+                  </span>
+                  <span
+                    id="crgrTagPill"
+                    class="text-xs px-2 py-1 rounded-lg border border-regen-green/25 bg-regen-green/10 text-regen-green"
+                  >
+                    Regenera
+                  </span>
+                </div>
 
-    function row(i){
-      return `
-        <article class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow shine transition">
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <div class="flex items-center gap-2 flex-wrap">
-                <div class="text-xs text-slate-300">${i.subTipo || i.tipo}</div>
-                ${themeBadge(i.tema)}
-                ${pill("🗺️ " + (i.territorio||"—"))}
-                ${pill("🗓️ " + formatDate(i.data))}
+                <p id="crgrDesc" class="mt-2 text-sm text-slate-700 max-w-3xl">—</p>
+
+                <div class="mt-3 flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-slate-700">
+                  <div class="flex items-center gap-2">
+                    <span class="text-regen-green">📍</span>
+                    <span id="crgrAddr">—</span>
+                  </div>
+                  <span class="hidden sm:inline text-slate-300">•</span>
+                  <div class="flex items-center gap-2">
+                    <span class="text-regen-blue">🕒</span>
+                    <span id="crgrHours">—</span>
+                  </div>
+                </div>
+
+                <div class="mt-4 flex flex-wrap gap-2">
+                  <a
+                    id="btnDirections"
+                    target="_blank"
+                    rel="noopener"
+                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-regen-blue text-white text-sm hover:opacity-95 shadow-sm"
+                    href="#"
+                  >
+                    <span>🧭</span> Como chegar
+                  </a>
+
+                  <button
+                    data-open-tab="tab-calendar"
+                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 text-sm hover:bg-regen-bg"
+                  >
+                    <span>📅</span> Ver calendário
+                  </button>
+
+                  <button
+                    data-open-tab="tab-map"
+                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 text-sm hover:bg-regen-bg"
+                  >
+                    <span>🗺️</span> Pontos no mapa
+                  </button>
+
+                  <button
+                    data-open-tab="tab-special"
+                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-regen-green/30 bg-regen-green/10 text-regen-green text-sm hover:bg-regen-green/15"
+                  >
+                    <span>🚚</span> Coleta especial
+                  </button>
+
+                  <button
+                    data-open-tab="tab-ombudsman"
+                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-regen-yellow/50 bg-regen-yellow/15 text-regen-graphite text-sm hover:bg-regen-yellow/20"
+                  >
+                    <span>🧾</span> Sugestões/Reclamações
+                  </button>
+                </div>
               </div>
-              <h3 class="mt-2 font-extrabold leading-snug">${i.titulo}</h3>
-              <p class="mt-1 text-sm text-slate-200/90">${i.resumo || ""}</p>
-            </div>
-            <div class="flex flex-col gap-2 shrink-0">
-              <button class="open-item px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100 text-sm" data-id="${i.id}">Abrir</button>
-              <button class="copy-link px-4 py-2 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/15 text-sm" data-id="${i.id}">Copiar link</button>
-            </div>
-          </div>
-        </article>
-      `;
-    }
 
-    function empty(msg){
-      return `<div class="rounded-3xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">${msg}</div>`;
-    }
+              <!-- Contact + Territory -->
+              <div class="w-full md:w-96 shrink-0">
+                <div class="rounded-2xl border border-slate-200 bg-white/70 p-4">
+                  <div class="flex items-center justify-between">
+                    <div class="text-xs font-semibold text-slate-500">CONTATO</div>
+                    <span class="text-xs px-2 py-1 rounded-lg bg-regen-bg border border-slate-200 text-slate-600">Canal oficial</span>
+                  </div>
+                  <div id="crgrContact" class="mt-2 text-sm text-regen-graphite">—</div>
 
-    // ---------- RENDER ----------
-    function renderAll(){
-      const list = filtered();
-
-      const noticias = list.filter(i=>i.tipo==="Notícia").length;
-      const conteudos = list.filter(i=>i.tipo==="Conteúdo").length;
-      const eventos = list.filter(i=>i.tipo==="Evento").length;
-      const atualizacoes = list.filter(i=>["Notícia","Comunicado"].includes(i.tipo)).length;
-
-      $("kpiNoticias").textContent = noticias;
-      $("kpiConteudos2").textContent = conteudos;
-      $("kpiEventos").textContent = eventos;
-      $("kpiTerritorios2").textContent = territorios.length;
-
-      $("kpiAtualizacoes").textContent = atualizacoes;
-      $("kpiConteudos").textContent = conteudos;
-      $("kpiTerritorios").textContent = territorios.length;
-
-      // Featured
-      const featured = list.filter(i=>i.tipo==="Conteúdo" && i.destaque)
-        .sort((a,b)=>parseDateISO(b.data)-parseDateISO(a.data)).slice(0,6);
-      $("featured").innerHTML = featured.map(card).join("") || empty("Nenhum conteúdo em destaque com os filtros atuais.");
-
-      // Results (library)
-      const library = list.filter(i=>i.tipo==="Conteúdo").sort((a,b)=>parseDateISO(b.data)-parseDateISO(a.data));
-      $("countResults").textContent = library.length;
-      $("results").className = state.view==="grid"
-        ? "mt-4 grid grid-cols-1 md:grid-cols-2 gap-3"
-        : "mt-4 space-y-3";
-      $("results").innerHTML = (state.view==="grid" ? library.map(card) : library.map(row)).join("")
-        || empty("Nenhum conteúdo encontrado com os filtros atuais.");
-
-      // News
-      const news = list.filter(i=>i.tipo==="Notícia").sort((a,b)=>parseDateISO(b.data)-parseDateISO(a.data)).slice(0,6);
-      $("news").innerHTML = news.map(n=>`
-        <article class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow shine transition">
-          ${n.img ? `
-            <div class="relative h-28 rounded-2xl overflow-hidden border border-white/10">
-              <img src="${n.img}" class="h-full w-full object-cover hover:scale-[1.08] transition duration-500" alt="">
-              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/75 to-transparent"></div>
-              <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-                <div class="text-xs text-slate-200">🗓️ ${formatDate(n.data)} • ${n.territorio}</div>
-                ${themeBadge(n.tema)}
+                  <div class="mt-4 rounded-2xl border border-slate-200 bg-regen-bg p-3">
+                    <div class="text-xs font-semibold text-slate-500">TERRITÓRIO ATENDIDO</div>
+                    <div id="serviceAreaChips" class="mt-2 flex flex-wrap gap-2"></div>
+                    <div id="serviceAreaHint" class="mt-2 text-xs text-slate-600"></div>
+                  </div>
+                </div>
               </div>
             </div>
-          ` : `
+          </div>
+        </section>
+
+        <!-- Quick cards -->
+        <section class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-soft transition">
             <div class="flex items-center justify-between">
-              <div class="text-xs text-slate-300">🗓️ ${formatDate(n.data)} • ${n.territorio}</div>
-              ${themeBadge(n.tema)}
+              <div class="text-xs text-slate-500">Próxima coleta no bairro</div>
+              <div class="h-9 w-9 rounded-xl bg-regen-green/10 grid place-items-center text-regen-green">📦</div>
             </div>
-          `}
-          <h3 class="mt-3 font-extrabold leading-snug">${n.titulo}</h3>
-          <p class="mt-1 text-sm text-slate-200/90">${n.resumo || ""}</p>
-          <div class="mt-3">
-            <button class="open-item px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100 text-sm" data-id="${n.id}">
-              Ler notícia
-            </button>
-          </div>
-        </article>
-      `).join("") || empty("Nenhuma notícia com os filtros atuais.");
-
-      // Territórios
-      $("territorios").innerHTML = territorios.map(t=>`
-        <button class="w-full text-left rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow shine transition hover:bg-white/10"
-          data-territorio="${t.nome}">
-          <div class="flex items-center justify-between">
-            <div class="font-extrabold">${t.icon} ${t.nome}</div>
-            <span class="text-xs text-slate-300">${formatDate(t.updatedAt)}</span>
-          </div>
-          <div class="mt-1 text-sm text-slate-200/90">${t.status}</div>
-          <div class="mt-3 flex flex-wrap gap-2">
-            ${pill("🔎 Filtrar")}
-            ${state.territorio===t.nome ? pill("✅ Ativo") : ""}
-          </div>
-        </button>
-      `).join("");
-
-      document.querySelectorAll("[data-territorio]").forEach(btn=>{
-        btn.onclick = ()=>{
-          state.territorio = btn.dataset.territorio;
-          $("fTerritorio").value = state.territorio;
-          renderAll();
-          window.scrollTo({top:0,behavior:"smooth"});
-        };
-      });
-
-      // Eventos
-      const evs = list.filter(i=>i.tipo==="Evento").sort((a,b)=>parseDateISO(a.data)-parseDateISO(b.data)).slice(0,5);
-      $("events").innerHTML = evs.map(e=>`
-        <article class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow shine transition">
-          <div class="flex items-center justify-between">
-            <div class="text-xs text-slate-300">🗓️ ${formatDate(e.data)} • ${e.local || "—"}</div>
-            ${themeBadge(e.tema)}
-          </div>
-          <h3 class="mt-2 font-extrabold">${e.titulo}</h3>
-          <p class="mt-1 text-sm text-slate-200/90">${e.resumo || ""}</p>
-          <div class="mt-3">
-            <button class="open-item px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100 text-sm" data-id="${e.id}">
+            <div id="cardNextPickup" class="mt-2 text-base font-semibold text-regen-blue">—</div>
+            <button data-open-tab="tab-calendar" class="mt-3 text-sm underline text-regen-blue hover:text-regen-green">
               Ver detalhes
             </button>
           </div>
-        </article>
-      `).join("") || empty("Nenhum evento no período.");
 
-      // Hint
-      const activeFilters = [state.territorio, state.tema, state.tipo].filter(Boolean).length + (state.periodo!=="all"?1:0) + (state.q?1:0);
-      $("hint").classList.toggle("hidden", activeFilters===0);
-      if(activeFilters>0) $("hint").textContent = `✨ Filtros ativos: ${activeFilters} • Itens: ${list.length}`;
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-soft transition">
+            <div class="flex items-center justify-between">
+              <div class="text-xs text-slate-500">Pontos de coleta no mapa</div>
+              <div class="h-9 w-9 rounded-xl bg-regen-blue/10 grid place-items-center text-regen-blue">📍</div>
+            </div>
+            <div id="cardPointsCount" class="mt-2 text-base font-semibold text-regen-blue">—</div>
+            <button data-open-tab="tab-map" class="mt-3 text-sm underline text-regen-blue hover:text-regen-green">
+              Abrir mapa
+            </button>
+          </div>
 
-      bindClicks();
-    }
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-soft transition">
+            <div class="flex items-center justify-between">
+              <div class="text-xs text-slate-500">Treinamentos disponíveis</div>
+              <div class="h-9 w-9 rounded-xl bg-regen-yellow/20 grid place-items-center text-regen-graphite">🎓</div>
+            </div>
+            <div id="cardTrainingsCount" class="mt-2 text-base font-semibold text-regen-blue">—</div>
+            <button data-open-tab="tab-trainings" class="mt-3 text-sm underline text-regen-blue hover:text-regen-green">
+              Ver treinamentos
+            </button>
+          </div>
+        </section>
 
-    // ---------- MODAL ----------
-    function openModal(item){
-      $("modalType").textContent = item.tipo + (item.subTipo ? " • " + item.subTipo : "");
-      $("modalTitle").textContent = item.titulo;
-      $("modalMeta").textContent = `${item.tema || "—"} • ${item.territorio || "—"} • ${formatDate(item.data)}`;
-      $("modalBody").textContent = item.corpo || item.resumo || "Sem descrição.";
+        <!-- Tabs -->
+        <section class="mt-6">
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-soft overflow-hidden">
+            <div class="flex flex-wrap gap-1 p-2 border-b border-slate-200 bg-white">
+              <button class="tab-btn px-3 py-2 rounded-xl text-sm hover:bg-regen-bg" data-tab="tab-overview">Visão geral</button>
+              <button class="tab-btn px-3 py-2 rounded-xl text-sm hover:bg-regen-bg" data-tab="tab-services">Serviços</button>
+              <button class="tab-btn px-3 py-2 rounded-xl text-sm hover:bg-regen-bg" data-tab="tab-map">Mapa</button>
+              <button class="tab-btn px-3 py-2 rounded-xl text-sm hover:bg-regen-bg" data-tab="tab-calendar">Calendário</button>
+              <button class="tab-btn px-3 py-2 rounded-xl text-sm hover:bg-regen-bg" data-tab="tab-trainings">Treinamentos</button>
+              <button class="tab-btn px-3 py-2 rounded-xl text-sm hover:bg-regen-bg" data-tab="tab-special">Coleta especial</button>
+              <button class="tab-btn px-3 py-2 rounded-xl text-sm hover:bg-regen-bg" data-tab="tab-ombudsman">Ouvidoria</button>
+            </div>
 
-      const actions = [];
-      actions.push(`<button class="copy-link px-4 py-2 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/15 text-sm" data-id="${item.id}">Copiar link</button>`);
-      if(item.tipo==="Conteúdo") actions.unshift(`<a class="px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100 text-sm" href="${item.url||"#"}">Abrir material</a>`);
-      if(item.tipo==="Evento") actions.unshift(`<button class="px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100 text-sm" onclick="alert('Aqui entra inscrição / calendário')">Inscrever-se</button>`);
-      if(item.tipo==="Notícia") actions.unshift(`<button class="px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100 text-sm" onclick="alert('Aqui entra a rota /noticias/${item.id}')">Ir para página</button>`);
+            <div class="p-5">
+              <!-- TAB: Overview -->
+              <div id="tab-overview" class="tab-panel">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <div class="lg:col-span-2">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <h2 class="text-base font-semibold text-regen-blue">Comunicados da cooperativa</h2>
+                        <p class="text-sm text-slate-600 mt-1">Avisos e atualizações do território.</p>
+                      </div>
+                      <div class="hidden sm:flex items-center gap-2">
+                        <span class="text-xs px-2 py-1 rounded-lg bg-regen-green/10 border border-regen-green/20 text-regen-green">Atual</span>
+                        <span class="text-xs px-2 py-1 rounded-lg bg-regen-bg border border-slate-200 text-slate-600">Timeline</span>
+                      </div>
+                    </div>
 
-      $("modalActions").innerHTML = actions.join("");
-      $("modal").classList.remove("hidden");
-      $("modalActions").querySelectorAll(".copy-link").forEach(b=> b.onclick = ()=> copyDeepLink(b.dataset.id));
-    }
+                    <div id="noticesList" class="mt-4 space-y-3"></div>
+                  </div>
 
-    function closeModal(){ $("modal").classList.add("hidden"); }
+                  <div>
+                    <div class="rounded-2xl border border-slate-200 bg-regen-bg p-4">
+                      <h3 class="text-sm font-semibold text-regen-blue">Resumo rápido</h3>
 
-    // ---------- DEEPLINK ----------
-    function makeDeepLink(id){
-      const url = new URL(window.location.href);
-      url.hash = `#item=${encodeURIComponent(id)}`;
-      return url.toString();
-    }
-    async function copyDeepLink(id){
-      const link = makeDeepLink(id);
-      try{
-        await navigator.clipboard.writeText(link);
-        $("hint").classList.remove("hidden");
-        $("hint").textContent = "✅ Link copiado!";
-        setTimeout(()=> $("hint").classList.add("hidden"), 1200);
-      }catch(e){
-        alert("Não foi possível copiar automaticamente. Link: " + link);
+                      <div class="mt-3 space-y-2 text-sm">
+                        <div class="flex justify-between gap-3">
+                          <span class="text-slate-600">Materiais aceitos</span>
+                          <span id="summaryAccepted" class="font-semibold text-regen-blue">—</span>
+                        </div>
+                        <div class="flex justify-between gap-3">
+                          <span class="text-slate-600">Não aceitos</span>
+                          <span id="summaryNotAccepted" class="font-semibold text-regen-blue">—</span>
+                        </div>
+                        <div class="flex justify-between gap-3">
+                          <span class="text-slate-600">Pontos no mapa</span>
+                          <span id="summaryPoints" class="font-semibold text-regen-blue">—</span>
+                        </div>
+                      </div>
+
+                      <div class="mt-4 grid grid-cols-2 gap-2">
+                        <button
+                          data-open-tab="tab-services"
+                          class="px-3 py-2 rounded-xl bg-white border border-slate-200 text-sm hover:bg-regen-bg"
+                        >
+                          Serviços
+                        </button>
+                        <button
+                          data-open-tab="tab-map"
+                          class="px-3 py-2 rounded-xl bg-white border border-slate-200 text-sm hover:bg-regen-bg"
+                        >
+                          Mapa
+                        </button>
+                      </div>
+
+                      <div class="mt-4 p-3 rounded-2xl bg-white border border-slate-200">
+                        <div class="text-xs font-semibold text-slate-500">Atalho rápido</div>
+                        <button
+                          data-open-tab="tab-special"
+                          class="mt-2 w-full px-3 py-2 rounded-xl bg-regen-green text-white text-sm hover:opacity-95"
+                        >
+                          🚚 Cadastrar coleta especial
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB: Services -->
+              <div id="tab-services" class="tab-panel hidden">
+                <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+                  <div>
+                    <h2 class="text-base font-semibold text-regen-blue">Serviços e materiais</h2>
+                    <p class="text-sm text-slate-600 mt-1">O que a CRGR oferece e como participar.</p>
+                  </div>
+                  <div class="text-xs text-slate-500">
+                    Dica: prefira resíduos <span class="font-semibold text-regen-green">limpos e secos</span>.
+                  </div>
+                </div>
+
+                <div class="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div class="rounded-2xl border border-slate-200 p-4 bg-white">
+                    <div class="flex items-center justify-between">
+                      <h3 class="text-sm font-semibold text-regen-blue">Materiais aceitos</h3>
+                      <span class="text-xs px-2 py-1 rounded-lg bg-regen-green/10 border border-regen-green/20 text-regen-green">OK</span>
+                    </div>
+                    <ul id="acceptedList" class="mt-3 text-sm text-slate-700 list-disc pl-5 space-y-1"></ul>
+                  </div>
+
+                  <div class="rounded-2xl border border-slate-200 p-4 bg-white">
+                    <div class="flex items-center justify-between">
+                      <h3 class="text-sm font-semibold text-regen-blue">Materiais não aceitos</h3>
+                      <span class="text-xs px-2 py-1 rounded-lg bg-regen-yellow/20 border border-regen-yellow text-regen-graphite">Atenção</span>
+                    </div>
+                    <ul id="notAcceptedList" class="mt-3 text-sm text-slate-700 list-disc pl-5 space-y-1"></ul>
+                  </div>
+
+                  <div class="rounded-2xl border border-slate-200 p-4 bg-regen-bg lg:col-span-2">
+                    <div class="flex items-center justify-between">
+                      <h3 class="text-sm font-semibold text-regen-blue">Oferta de serviços</h3>
+                      <span class="text-xs px-2 py-1 rounded-lg bg-white border border-slate-200 text-slate-600">Cards</span>
+                    </div>
+                    <div id="servicesCards" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB: Map -->
+              <div id="tab-map" class="tab-panel hidden">
+                <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+                  <div>
+                    <h2 class="text-base font-semibold text-regen-blue">Mapa de pontos de coleta</h2>
+                    <p class="text-sm text-slate-600 mt-1">Veja no mapa e filtre por tipo de resíduo.</p>
+                  </div>
+
+                  <div class="flex flex-wrap gap-2">
+                    <select id="filterType" class="px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                      <option value="all">Todos os tipos</option>
+                    </select>
+
+                    <button
+                      id="btnUseMyLocation"
+                      class="px-3 py-2 rounded-xl border border-slate-200 text-sm hover:bg-regen-bg"
+                    >
+                      📍 Perto de mim
+                    </button>
+                  </div>
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <div class="lg:col-span-2 rounded-2xl border border-slate-200 overflow-hidden bg-white">
+                    <div id="map" class="w-full"></div>
+                  </div>
+
+                  <div class="rounded-2xl border border-slate-200 p-4 bg-white">
+                    <div class="flex items-center justify-between">
+                      <h3 class="text-sm font-semibold text-regen-blue">Lista de pontos</h3>
+                      <span id="pointsBadge" class="text-xs px-2 py-1 rounded-lg bg-regen-bg border border-slate-200 text-slate-600">0</span>
+                    </div>
+                    <div id="pointsList" class="mt-3 space-y-3 max-h-[440px] overflow-auto pr-1 nice-scroll"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB: Calendar -->
+              <div id="tab-calendar" class="tab-panel hidden">
+                <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+                  <div>
+                    <h2 class="text-base font-semibold text-regen-blue">Calendário de coletas</h2>
+                    <p class="text-sm text-slate-600 mt-1">Datas por tipo e região/rota.</p>
+                  </div>
+
+                  <div class="flex flex-wrap gap-2">
+                    <select id="filterPickupType" class="px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                      <option value="all">Todos</option>
+                      <option value="seletiva">Seletiva</option>
+                      <option value="especial">Especial</option>
+                      <option value="mutirao">Mutirão</option>
+                    </select>
+                    <input
+                      id="filterPickupQuery"
+                      class="px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
+                      placeholder="Filtrar por bairro/rota..."
+                    />
+                  </div>
+                </div>
+
+                <div class="mt-4 rounded-2xl border border-slate-200 overflow-hidden bg-white">
+                  <div class="px-4 py-3 bg-regen-bg border-b border-slate-200 text-sm font-semibold text-regen-blue">
+                    Próximos eventos
+                  </div>
+                  <div id="calendarList" class="divide-y divide-slate-200"></div>
+                </div>
+              </div>
+
+              <!-- TAB: Trainings -->
+              <div id="tab-trainings" class="tab-panel hidden">
+                <div class="flex items-start justify-between flex-wrap gap-3">
+                  <div>
+                    <h2 class="text-base font-semibold text-regen-blue">Treinamentos disponíveis</h2>
+                    <p class="text-sm text-slate-600 mt-1">Inscreva-se e acompanhe seu status.</p>
+                  </div>
+
+                  <input
+                    id="filterTraining"
+                    class="px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
+                    placeholder="Buscar treinamento..."
+                  />
+                </div>
+
+                <div id="trainingsGrid" class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+              </div>
+
+              <!-- TAB: Special pickup -->
+              <div id="tab-special" class="tab-panel hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <div class="lg:col-span-2">
+                    <h2 class="text-base font-semibold text-regen-blue">Cadastro para coleta seletiva especial</h2>
+                    <p class="text-sm text-slate-600 mt-1">
+                      Para grandes volumes, ações específicas ou materiais que exigem agendamento.
+                    </p>
+
+                    <form id="specialForm" class="mt-5 space-y-4">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label class="text-sm font-medium">Nome</label>
+                          <input
+                            id="specialName"
+                            class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm"
+                            placeholder="Seu nome"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label class="text-sm font-medium">Telefone/WhatsApp</label>
+                          <input
+                            id="specialPhone"
+                            class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm"
+                            placeholder="(51) 99999-9999"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label class="text-sm font-medium">Endereço</label>
+                        <input
+                          id="specialAddress"
+                          class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm"
+                          placeholder="Rua, número, bairro"
+                          required
+                        />
+                      </div>
+
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label class="text-sm font-medium">Tipo de material</label>
+                          <select
+                            id="specialMaterial"
+                            class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm"
+                          ></select>
+                        </div>
+                        <div>
+                          <label class="text-sm font-medium">Volume estimado</label>
+                          <select
+                            id="specialVolume"
+                            class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm"
+                          >
+                            <option value="pequeno">Pequeno (até 1 saco)</option>
+                            <option value="medio">Médio (2–5 sacos)</option>
+                            <option value="grande">Grande (mais de 5 sacos)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label class="text-sm font-medium">Observações</label>
+                        <textarea
+                          id="specialNotes"
+                          class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm"
+                          rows="3"
+                          placeholder="Ex: melhor horário para contato, ponto de referência..."
+                        ></textarea>
+                      </div>
+
+                      <div class="flex flex-wrap gap-2">
+                        <button
+                          class="px-4 py-2 rounded-xl bg-regen-green text-white text-sm hover:opacity-95 shadow-sm"
+                          type="submit"
+                        >
+                          Enviar solicitação
+                        </button>
+                        <button
+                          class="px-4 py-2 rounded-xl border border-slate-200 text-sm hover:bg-regen-bg"
+                          type="button"
+                          id="btnViewMySpecialRequests"
+                        >
+                          Ver minhas solicitações
+                        </button>
+                      </div>
+                    </form>
+
+                    <div id="specialResult" class="mt-4"></div>
+                  </div>
+
+                  <div class="rounded-2xl border border-slate-200 bg-regen-bg p-4">
+                    <h3 class="text-sm font-semibold text-regen-blue">Como funciona</h3>
+                    <ol class="mt-3 list-decimal pl-5 text-sm text-slate-700 space-y-2">
+                      <li>Preencha o formulário com endereço e material.</li>
+                      <li>A cooperativa analisa disponibilidade e rota.</li>
+                      <li>Você recebe retorno com status e orientações.</li>
+                    </ol>
+
+                    <div class="mt-4 p-3 rounded-2xl bg-white border border-slate-200">
+                      <div class="font-semibold text-sm text-regen-blue">Dica</div>
+                      <div class="mt-1 text-sm text-slate-600">
+                        Vidros devem estar embalados com segurança.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-6 rounded-2xl border border-slate-200 overflow-hidden bg-white">
+                  <div class="px-4 py-3 bg-regen-bg border-b border-slate-200 text-sm font-semibold text-regen-blue">
+                    Minhas solicitações (demo em memória)
+                  </div>
+                  <div id="specialRequestsList" class="divide-y divide-slate-200"></div>
+                </div>
+              </div>
+
+              <!-- TAB: Ombudsman -->
+              <div id="tab-ombudsman" class="tab-panel hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <div class="lg:col-span-2">
+                    <h2 class="text-base font-semibold text-regen-blue">Sugestões e reclamações</h2>
+                    <p class="text-sm text-slate-600 mt-1">
+                      Envie sua mensagem. Você receberá um número de protocolo para acompanhamento.
+                    </p>
+
+                    <form id="ticketForm" class="mt-5 space-y-4">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label class="text-sm font-medium">Tipo</label>
+                          <select
+                            id="ticketType"
+                            class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm"
+                          >
+                            <option value="sugestao">Sugestão</option>
+                            <option value="reclamacao">Reclamação</option>
+                            <option value="duvida">Dúvida</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label class="text-sm font-medium">Assunto</label>
+                          <input
+                            id="ticketSubject"
+                            class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm"
+                            placeholder="Ex: Coleta atrasada na rota X"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label class="text-sm font-medium">Mensagem</label>
+                        <textarea
+                          id="ticketMessage"
+                          class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm"
+                          rows="4"
+                          placeholder="Descreva o que aconteceu e, se possível, informe local e data."
+                          required
+                        ></textarea>
+                      </div>
+
+                      <div class="flex flex-wrap gap-2">
+                        <button
+                          class="px-4 py-2 rounded-xl bg-regen-blue text-white text-sm hover:opacity-95 shadow-sm"
+                          type="submit"
+                        >
+                          Enviar
+                        </button>
+                        <button
+                          class="px-4 py-2 rounded-xl border border-slate-200 text-sm hover:bg-regen-bg"
+                          type="button"
+                          id="btnViewMyTickets"
+                        >
+                          Ver meus protocolos
+                        </button>
+                      </div>
+                    </form>
+
+                    <div id="ticketResult" class="mt-4"></div>
+                  </div>
+
+                  <div class="rounded-2xl border border-slate-200 bg-regen-bg p-4">
+                    <h3 class="text-sm font-semibold text-regen-blue">O que acontece depois</h3>
+                    <ul class="mt-3 list-disc pl-5 text-sm text-slate-700 space-y-2">
+                      <li>O chamado entra como <span class="font-semibold">Aberto</span>.</li>
+                      <li>A equipe responde e pode solicitar detalhes.</li>
+                      <li>Quando resolvido, o status muda para <span class="font-semibold">Encerrado</span>.</li>
+                    </ul>
+                    <div class="mt-4 p-3 rounded-2xl bg-white border border-slate-200">
+                      <div class="text-xs font-semibold text-slate-500">Boas práticas</div>
+                      <div class="mt-1 text-sm text-slate-600">
+                        Informe data, bairro/rota e, se possível, ponto de referência.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-6 rounded-2xl border border-slate-200 overflow-hidden bg-white">
+                  <div class="px-4 py-3 bg-regen-bg border-b border-slate-200 text-sm font-semibold text-regen-blue">
+                    Meus protocolos (demo em memória)
+                  </div>
+                  <div id="ticketsList" class="divide-y divide-slate-200"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="mt-8 text-xs text-slate-500">
+          Demo front-end (HTML + Tailwind + JS). Para produção, conecte via API (CRGR, pontos, calendário, chamados, inscrições).
+        </footer>
+      </main>
+    </div>
+
+    <script>
+      /***********************
+       * DADOS (mock / demo)
+       ***********************/
+      const MATERIAL_TYPES = [
+        { key: "papel", label: "Papel/Papelão" },
+        { key: "plastico", label: "Plástico" },
+        { key: "metal", label: "Metal" },
+        { key: "vidro", label: "Vidro" },
+        { key: "pilhas", label: "Pilhas/Baterias" },
+        { key: "eletronicos", label: "Eletroeletrônicos (especial)" },
+        { key: "grande_volume", label: "Grande volume (especial)" },
+      ];
+
+      const CRGRS = [
+        {
+          id: "vila-pinto",
+          short: "Vila Pinto",
+          tag: "Bom Jesus",
+          name: "CRGR Vila Pinto — Unidade de Triagem e Centro de Educação Ambiental",
+          desc:
+            "Atende principalmente a comunidade do bairro Bom Jesus e regiões adjacentes, com foco em coleta seletiva solidária, triagem e ações de educação ambiental.",
+          address: "Av. Joaquim Porto Villanova, 143 — Bom Jesus — Porto Alegre/RS",
+          lat: -30.0309,
+          lng: -51.1595,
+          hours: "Seg–Sex 08:00–17:00",
+          contact: "Telefone: (51) 0000-0000 • E-mail: contato@exemplo.org",
+          serviceArea: {
+            regiao: "Bom Jesus e adjacências",
+            chips: ["Bom Jesus", "regiões adjacentes", "comunidade local"],
+          },
+          accepted: ["Papel e papelão", "Plásticos", "Metais", "Vidro (embalado com segurança)", "Embalagens longa vida"],
+          notAccepted: ["Orgânicos", "Resíduos de banheiro", "Entulho", "Resíduos hospitalares", "Pilhas/baterias (ver ponto dedicado)"],
+          services: [
+            { title: "Recebimento de recicláveis", text: "Entrega voluntária no horário de funcionamento, conforme regras de separação.", tag: "Atendimento local" },
+            { title: "Coleta seletiva solidária", text: "Triagem de resíduos secos recebidos por rotas e parcerias.", tag: "Triagem/Reciclagem" },
+            { title: "Educação ambiental", text: "Ações e formações no território (agenda conforme disponibilidade).", tag: "Formação" },
+            { title: "Coleta seletiva especial", text: "Cadastro para grandes volumes e ações específicas (sujeito a análise).", tag: "Agendamento" },
+          ],
+          notices: [
+            { title: "Atenção: mudança de horário (sexta)", date: "2026-02-10", text: "Na sexta-feira, o atendimento encerra às 16:00 devido a manutenção interna." },
+            { title: "Campanha: separação correta do vidro", date: "2026-02-06", text: "Vidros devem estar limpos e embalados. Evite envio de cacos soltos." },
+          ],
+          points: [
+            { id: "vp-1", name: "PEV Bom Jesus — Praça", address: "Praça (ponto de referência) — Bom Jesus", lat: -30.0296, lng: -51.1566, types: ["papel", "plastico", "metal", "vidro"], hours: "Diário 07:00–19:00" },
+            { id: "vp-2", name: "Ponto Parceiro — Mercado", address: "Rua Exemplo, 100 — Bom Jesus", lat: -30.0321, lng: -51.1622, types: ["papel", "plastico", "metal"], hours: "Seg–Sáb 08:00–20:00" },
+            { id: "vp-3", name: "Ponto dedicado — Pilhas e baterias", address: "Av. Exemplo, 200 — Bom Jesus", lat: -30.0289, lng: -51.1601, types: ["pilhas"], hours: "Seg–Sex 09:00–18:00" },
+          ],
+          pickups: [
+            { id: "p1", type: "seletiva", date: "2026-02-13T09:00:00-03:00", window: "09:00–12:00", area: "Bom Jesus — Rota A", notes: "Separar secos limpos e acondicionar em sacos." },
+            { id: "p2", type: "seletiva", date: "2026-02-17T13:00:00-03:00", window: "13:00–16:00", area: "Bom Jesus — Rota B", notes: "Evitar vidro solto. Embalar." },
+            { id: "p3", type: "especial", date: "2026-02-20T08:00:00-03:00", window: "08:00–17:00", area: "Agendamentos (sob análise)", notes: "Coleta especial mediante cadastro e confirmação." },
+          ],
+          trainings: [
+            { id: "t1", title: "Introdução à Coleta Seletiva", duration: "30 min", mode: "Online", tags: ["básico"], desc: "Como separar corretamente resíduos secos no dia a dia.", link: "#" },
+            { id: "t2", title: "Resíduos e Reciclagem na prática", duration: "45 min", mode: "Online", tags: ["intermediário"], desc: "Tipos de materiais e erros comuns na separação.", link: "#" },
+            { id: "t3", title: "Segurança e manuseio do vidro", duration: "20 min", mode: "Online", tags: ["segurança"], desc: "Como acondicionar e evitar acidentes com vidro.", link: "#" },
+          ],
+        },
+
+        {
+          id: "cooadesc",
+          short: "COOADESC",
+          tag: "Farrapos",
+          name: "CRGR COOADESC — Unidade de Triagem (UT) Conveniada ao DMLU",
+          desc:
+            "Unidade de Triagem conveniada ao DMLU em Porto Alegre. Atua principalmente na coleta seletiva e triagem de resíduos secos de diversas áreas da cidade.",
+          address: "Bairro Farrapos — Zona Norte — Porto Alegre/RS (endereço de referência)",
+          lat: -30.0021,
+          lng: -51.1978,
+          hours: "Seg–Sex 08:00–17:00",
+          contact: "Telefone: (51) 1111-1111 • E-mail: cooadesc@exemplo.org",
+          serviceArea: {
+            regiao: "Porto Alegre (diversas áreas)",
+            chips: ["Farrapos", "Zona Norte", "diversas regiões"],
+          },
+          accepted: ["Papel e papelão", "Plásticos", "Metais", "Vidro (embalado)"],
+          notAccepted: ["Orgânicos", "Entulho", "Resíduos perigosos", "Resíduos hospitalares"],
+          services: [
+            { title: "Triagem de resíduos secos", text: "Processamento e separação para reciclagem.", tag: "Triagem" },
+            { title: "Atendimento a rotas", text: "Recebimento de material de diversas regiões.", tag: "Cidade" },
+            { title: "Coleta seletiva especial", text: "Cadastro para casos específicos (sob análise).", tag: "Agendamento" },
+            { title: "Formações pontuais", text: "Treinamentos conforme disponibilidade.", tag: "Formação" },
+          ],
+          notices: [
+            { title: "Aviso: priorização de recebimento", date: "2026-02-08", text: "Nesta semana, priorizamos resíduos secos (papel/plástico/metal) devido a logística." },
+          ],
+          points: [
+            { id: "cd-1", name: "PEV Farrapos — Terminal", address: "Ponto de referência — Farrapos", lat: -30.0046, lng: -51.2009, types: ["papel", "plastico", "metal", "vidro"], hours: "Diário 07:00–19:00" },
+          ],
+          pickups: [
+            { id: "c1", type: "seletiva", date: "2026-02-14T09:00:00-03:00", window: "09:00–12:00", area: "Farrapos — Rota 1", notes: "Acondicionar em sacos." },
+            { id: "c2", type: "especial", date: "2026-02-21T08:00:00-03:00", window: "08:00–17:00", area: "Agendamentos (sob análise)", notes: "Confirmação via contato." },
+          ],
+          trainings: [{ id: "ct1", title: "Separação correta de recicláveis", duration: "25 min", mode: "Online", tags: ["básico"], desc: "Guia rápido para reduzir rejeitos.", link: "#" }],
+        },
+
+        {
+          id: "cooperilhas",
+          short: "COOPERILHAS",
+          tag: "Ilhas • Região 2",
+          name: "CRGR COOPERILHAS — Cooperativa de Trabalho dos Recicladores e Papeleiros da Ilha Grande dos Marinheiros",
+          desc:
+            "Atua principalmente na região das Ilhas e áreas adjacentes, focada na coleta de resíduos não perigosos. Atende a Região 2 (Humaitá/Navegantes/Ilhas e Noroeste) e áreas próximas.",
+          address: "Ilha Grande dos Marinheiros — Porto Alegre/RS (base no Arquipélago)",
+          // Coordenadas aproximadas do Arquipélago (para centralizar mapa)
+          lat: -30.0258,
+          lng: -51.2552,
+          hours: "Seg–Sex 08:00–17:00",
+          contact: "Telefone: (51) — • E-mail: —",
+          serviceArea: {
+            regiao: "Região 2 (Humaitá/Navegantes/Ilhas e Noroeste)",
+            chips: ["Humaitá", "Navegantes", "Farrapos", "São Geraldo", "Ilha das Flores", "Ilha do Pavão", "Ilha da Pintada", "Ilha Grande dos Marinheiros"],
+            hint:
+              "Atendimento prioritário no Arquipélago (Ilhas) e bairros da Região 2. Coleta voltada a resíduos não perigosos.",
+          },
+          accepted: ["Papel e papelão", "Plásticos", "Metais", "Vidro (embalado)"],
+          notAccepted: ["Orgânicos", "Entulho", "Resíduos perigosos", "Resíduos hospitalares"],
+          services: [
+            { title: "Coleta de resíduos não perigosos", text: "Foco em resíduos não perigosos para triagem e reciclagem.", tag: "Coleta" },
+            { title: "Triagem de resíduos secos", text: "Separação e encaminhamento de papel, plástico, metal e vidro.", tag: "Triagem" },
+            { title: "Atuação no território das Ilhas", text: "Cobertura do Arquipélago e áreas adjacentes, além de bairros da Região 2.", tag: "Território" },
+            { title: "Coleta seletiva especial", text: "Cadastro para casos específicos (sob análise/agenda).", tag: "Agendamento" },
+          ],
+          notices: [
+            {
+              title: "Abrangência de atendimento (Região 2)",
+              date: "2026-02-12",
+              text:
+                "Atendimento principal: Ilhas (Ilha Grande dos Marinheiros, Ilha das Flores, Ilha do Pavão, Ilha da Pintada) e bairros Humaitá, Navegantes, Farrapos, São Geraldo e arredores.",
+            },
+          ],
+          // você pode cadastrar pontos e calendário reais depois
+          points: [],
+          pickups: [],
+          trainings: [
+            { id: "cp1", title: "Separação correta de recicláveis (território das ilhas)", duration: "25 min", mode: "Online", tags: ["básico"], desc: "Boas práticas e redução de rejeitos na coleta seletiva.", link: "#" },
+          ],
+        },
+      ];
+
+      /***********************
+       * ESTADO
+       ***********************/
+      const state = {
+        crgr: CRGRS[0],
+        map: null,
+        markerLayer: null,
+        userMarker: null,
+        specialRequests: [],
+        tickets: [],
+      };
+
+      const $ = (sel) => document.querySelector(sel);
+      const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+      /***********************
+       * HELPERS
+       ***********************/
+      function escapeHtml(s) {
+        return String(s ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
       }
-    }
 
-    // ---------- BIND ----------
-    function bindClicks(){
-      document.querySelectorAll(".open-item").forEach(btn=>{
-        btn.onclick = ()=>{
-          const id = btn.dataset.id;
-          const item = itens.find(x=>x.id===id);
-          if(item) openModal(item);
-          history.replaceState(null,"",makeDeepLink(id));
+      function toast(msg) {
+        const div = document.createElement("div");
+        div.className =
+          "fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-2xl bg-regen-graphite text-white text-sm shadow-soft border border-white/10";
+        div.textContent = msg;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 2200);
+      }
+
+      function formatDateTime(iso) {
+        const d = new Date(iso);
+        return d.toLocaleString("pt-BR", {
+          weekday: "short",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      function badgeType(type) {
+        const styles = {
+          seletiva: "bg-regen-green/10 border-regen-green/25 text-regen-green",
+          especial: "bg-regen-blue/10 border-regen-blue/25 text-regen-blue",
+          mutirao: "bg-regen-yellow/20 border-regen-yellow text-regen-graphite",
         };
-      });
-      document.querySelectorAll(".copy-link").forEach(btn=>{
-        btn.onclick = ()=> copyDeepLink(btn.dataset.id);
-      });
-    }
+        const label = { seletiva: "Seletiva", especial: "Especial", mutirao: "Mutirão" };
+        return `<span class="text-xs px-2 py-1 rounded-lg border ${styles[type] || "bg-regen-bg border-slate-200 text-slate-700"}">${label[type] || type}</span>`;
+      }
 
-    // ---------- WIRES ----------
-    function wire(){
-      // filters
-      $("q").addEventListener("input",(e)=>{ state.q=e.target.value; renderAll(); });
-      $("clearQ").onclick = ()=>{ state.q=""; $("q").value=""; renderAll(); };
+      function makeProtocol(prefix = "PRT") {
+        const n = Math.floor(Math.random() * 90000) + 10000;
+        return `${prefix}-${n}`;
+      }
 
-      $("fTerritorio").onchange = (e)=>{ state.territorio=e.target.value; renderAll(); };
-      $("fTema").onchange = (e)=>{ state.tema=e.target.value; renderAll(); };
-      $("fTipo").onchange = (e)=>{ state.tipo=e.target.value; renderAll(); };
-      $("fPeriodo").onchange = (e)=>{ state.periodo=e.target.value; renderAll(); };
+      function isOpenNow() {
+        // Simplificado (demo): dias úteis 08–17
+        const now = new Date();
+        const day = now.getDay();
+        const h = now.getHours();
+        const isWeekday = day >= 1 && day <= 5;
+        return isWeekday && h >= 8 && h < 17 ? "Aberta agora" : "Fechada agora";
+      }
 
-      $("btnReset").onclick = ()=>{
-        state.q=""; state.territorio=""; state.tema=""; state.tipo=""; state.periodo="all";
-        $("q").value="";
-        $("fTerritorio").value="";
-        $("fTema").value="";
-        $("fTipo").value="";
-        $("fPeriodo").value="all";
-        renderAll();
-      };
+      function labelForType(key) {
+        const f = MATERIAL_TYPES.find((x) => x.key === key);
+        return f ? f.label : key;
+      }
 
-      $("toggleView").onclick = ()=>{
-        state.view = (state.view==="grid") ? "list" : "grid";
-        renderAll();
-      };
+      function getNextPickup(pickups) {
+        const now = new Date();
+        const future = (pickups || [])
+          .map((p) => ({ ...p, _d: new Date(p.date) }))
+          .filter((p) => p._d > now)
+          .sort((a, b) => a._d - b._d);
+        return future[0] || null;
+      }
 
-      // hero CTAs
-      $("ctaExplore").onclick = ()=> document.getElementById("conteudosSection").scrollIntoView({behavior:"smooth"});
-      $("ctaNews").onclick = ()=> document.getElementById("noticiasSection").scrollIntoView({behavior:"smooth"});
-      $("ctaTerr").onclick = ()=> document.getElementById("territoriosSection").scrollIntoView({behavior:"smooth"});
+      /***********************
+       * DROPDOWN COOPERATIVAS
+       ***********************/
+      function renderCooperativasMenu() {
+        const list = $("#cooperativasList");
+        list.innerHTML = "";
 
-      // nav
-      document.querySelectorAll("[data-nav]").forEach(btn=>{
-        btn.onclick = ()=>{
-          const key = btn.dataset.nav;
-          const map = { conteudos:"conteudosSection", noticias:"noticiasSection", territorios:"territoriosSection" };
-          if(key==="sobre"){ alert("Aqui pode abrir /sobre ou uma seção com parceiros, missão e como participar."); return; }
-          document.getElementById(map[key]).scrollIntoView({behavior:"smooth"});
-        };
-      });
+        CRGRS.forEach((c) => {
+          const isActive = state.crgr.id === c.id;
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className =
+            "w-full text-left px-3 py-3 rounded-xl hover:bg-regen-bg border " +
+            (isActive ? "border-regen-green/30 bg-regen-green/10" : "border-transparent");
+          btn.innerHTML = `
+            <div class="flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <div class="text-sm font-semibold text-regen-blue">
+                  ${escapeHtml(c.short)}
+                  <span class="text-slate-500 font-normal">— ${escapeHtml(c.tag || "")}</span>
+                </div>
+                <div class="text-xs text-slate-600 mt-1 line-clamp-2">${escapeHtml(c.address)}</div>
+              </div>
+              <span class="text-xs px-2 py-1 rounded-lg ${isActive ? "bg-regen-green text-white" : "bg-white border border-slate-200 text-slate-600"}">
+                ${isActive ? "Atual" : "Abrir"}
+              </span>
+            </div>
+          `;
+          btn.addEventListener("click", () => {
+            switchCRGR(c.id);
+            closeCooperativasMenu();
+          });
+          list.appendChild(btn);
+        });
+      }
 
-      // modal
-      $("modalClose").onclick = closeModal;
-      $("modal").addEventListener("click",(e)=>{ if(e.target === $("modal").firstElementChild) closeModal(); });
+      function openCooperativasMenu() {
+        $("#cooperativasMenu").classList.remove("hidden");
+        $("#btnCooperativas").setAttribute("aria-expanded", "true");
+      }
+      function closeCooperativasMenu() {
+        $("#cooperativasMenu").classList.add("hidden");
+        $("#btnCooperativas").setAttribute("aria-expanded", "false");
+      }
+      function toggleCooperativasMenu() {
+        const hidden = $("#cooperativasMenu").classList.contains("hidden");
+        hidden ? openCooperativasMenu() : closeCooperativasMenu();
+      }
 
-      // open by hash
-      const openByHash = ()=>{
-        const h = window.location.hash;
-        if(h.startsWith("#item=")){
-          const id = decodeURIComponent(h.replace("#item=",""));
-          const item = itens.find(x=>x.id===id);
-          if(item) openModal(item);
+      /***********************
+       * TABS
+       ***********************/
+      function setActiveTab(tabId) {
+        $$(".tab-panel").forEach((p) => p.classList.add("hidden"));
+        const panel = $(`#${tabId}`);
+        panel.classList.remove("hidden");
+        panel.classList.add("animate-fadeUp");
+
+        $$(".tab-btn").forEach((b) => {
+          const active = b.dataset.tab === tabId;
+          b.classList.toggle("bg-regen-blue", active);
+          b.classList.toggle("text-white", active);
+          b.classList.toggle("bg-white", !active);
+        });
+
+        if (tabId === "tab-map" && state.map) {
+          setTimeout(() => state.map.invalidateSize(true), 150);
         }
-      };
-      openByHash();
-      window.addEventListener("hashchange", openByHash);
-    }
+      }
 
-    // ---------- START ----------
-    initFilters();
-    wire();
-    renderAll();
-  </script>
-</body>
+      /***********************
+       * RENDER GERAL
+       ***********************/
+      function renderNotices() {
+        const c = state.crgr;
+        const el = $("#noticesList");
+        el.innerHTML = "";
+
+        if (!c.notices?.length) {
+          el.innerHTML = `<div class="text-sm text-slate-600">Nenhum comunicado no momento.</div>`;
+          return;
+        }
+
+        c.notices
+          .slice()
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .forEach((n, idx) => {
+            const date = new Date(n.date).toLocaleDateString("pt-BR");
+            const card = document.createElement("div");
+            card.className =
+              "rounded-2xl border border-slate-200 p-4 bg-white shadow-sm hover:shadow-soft transition";
+            card.style.animationDelay = `${idx * 60}ms`;
+            card.classList.add("animate-fadeUp");
+            card.innerHTML = `
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="text-sm font-semibold text-regen-blue">${escapeHtml(n.title)}</div>
+                  <div class="text-xs text-slate-500 mt-1">${date}</div>
+                  <div class="text-sm text-slate-700 mt-2">${escapeHtml(n.text)}</div>
+                </div>
+                <span class="text-xs px-2 py-1 rounded-lg bg-regen-bg border border-slate-200 text-slate-600">Aviso</span>
+              </div>
+            `;
+            el.appendChild(card);
+          });
+      }
+
+      function renderServices() {
+        const c = state.crgr;
+        $("#acceptedList").innerHTML = (c.accepted || []).map((x) => `<li>${escapeHtml(x)}</li>`).join("");
+        $("#notAcceptedList").innerHTML = (c.notAccepted || []).map((x) => `<li>${escapeHtml(x)}</li>`).join("");
+
+        const cards = $("#servicesCards");
+        cards.innerHTML = "";
+        (c.services || []).forEach((s, idx) => {
+          const div = document.createElement("div");
+          div.className =
+            "rounded-2xl border border-slate-200 p-4 bg-white shadow-sm hover:shadow-soft transition";
+          div.style.animationDelay = `${idx * 60}ms`;
+          div.classList.add("animate-fadeUp");
+          div.innerHTML = `
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-sm font-semibold text-regen-blue">${escapeHtml(s.title)}</div>
+                <div class="text-sm text-slate-700 mt-2">${escapeHtml(s.text)}</div>
+              </div>
+              <span class="text-xs px-2 py-1 rounded-lg bg-regen-green/10 border border-regen-green/20 text-regen-green whitespace-nowrap">
+                ${escapeHtml(s.tag)}
+              </span>
+            </div>
+          `;
+          cards.appendChild(div);
+        });
+      }
+
+      function renderCalendar() {
+        const c = state.crgr;
+        const type = $("#filterPickupType")?.value || "all";
+        const q = ($("#filterPickupQuery")?.value || "").toLowerCase().trim();
+
+        const items = (c.pickups || [])
+          .slice()
+          .sort((a, b) => new Date(a.date) - new Date(b.date))
+          .filter((p) => (type === "all" ? true : p.type === type))
+          .filter((p) => (q ? (p.area || "").toLowerCase().includes(q) : true));
+
+        const list = $("#calendarList");
+        list.innerHTML = "";
+
+        if (!items.length) {
+          list.innerHTML = `
+            <div class="px-4 py-6 text-sm text-slate-600">
+              Nenhuma coleta cadastrada para esta CRGR.
+              <button data-open-tab="tab-ombudsman" class="ml-1 underline text-regen-blue hover:text-regen-green">Sugerir uma atualização</button>
+            </div>`;
+          return;
+        }
+
+        items.forEach((p, idx) => {
+          const row = document.createElement("div");
+          row.className = "px-4 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3";
+          row.style.animationDelay = `${idx * 40}ms`;
+          row.classList.add("animate-fadeUp");
+          row.innerHTML = `
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                ${badgeType(p.type)}
+                <div class="text-sm font-semibold text-regen-blue">${formatDateTime(p.date)} <span class="text-slate-500 font-normal">(${escapeHtml(p.window)})</span></div>
+              </div>
+              <div class="mt-1 text-sm text-slate-700">${escapeHtml(p.area)}</div>
+              <div class="mt-1 text-xs text-slate-600">${escapeHtml(p.notes || "")}</div>
+            </div>
+            <div class="flex gap-2">
+              ${
+                p.type === "especial"
+                  ? `<button class="px-3 py-2 rounded-xl border border-regen-green/30 bg-regen-green/10 text-regen-green text-sm hover:bg-regen-green/15" data-open-tab="tab-special">Inscrever-se</button>`
+                  : `<button class="px-3 py-2 rounded-xl border border-slate-200 text-sm hover:bg-regen-bg" data-action="remind">Lembrete</button>`
+              }
+              <button class="px-3 py-2 rounded-xl bg-regen-blue text-white text-sm hover:opacity-95" data-action="share">Compartilhar</button>
+            </div>
+          `;
+          list.appendChild(row);
+        });
+      }
+
+      function renderTrainings() {
+        const c = state.crgr;
+        const q = ($("#filterTraining")?.value || "").toLowerCase().trim();
+        const grid = $("#trainingsGrid");
+        grid.innerHTML = "";
+
+        const items = (c.trainings || []).filter((t) =>
+          q ? t.title.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q) : true
+        );
+
+        if (!items.length) {
+          grid.innerHTML = `<div class="text-sm text-slate-600">Nenhum treinamento encontrado.</div>`;
+          return;
+        }
+
+        items.forEach((t, idx) => {
+          const div = document.createElement("div");
+          div.className =
+            "rounded-2xl border border-slate-200 p-4 bg-white shadow-sm hover:shadow-soft transition";
+          div.style.animationDelay = `${idx * 60}ms`;
+          div.classList.add("animate-fadeUp");
+          div.innerHTML = `
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="text-sm font-semibold text-regen-blue">${escapeHtml(t.title)}</div>
+                <div class="text-xs text-slate-500 mt-1">${escapeHtml(t.mode)} • ${escapeHtml(t.duration)}</div>
+                <div class="text-sm text-slate-700 mt-2">${escapeHtml(t.desc)}</div>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  ${(t.tags || []).map((x) => `<span class="text-xs px-2 py-1 rounded-lg bg-regen-bg border border-slate-200 text-slate-600">${escapeHtml(x)}</span>`).join("")}
+                </div>
+              </div>
+              <span class="text-xs px-2 py-1 rounded-lg bg-regen-yellow/20 border border-regen-yellow text-regen-graphite whitespace-nowrap">Disponível</span>
+            </div>
+            <div class="mt-4 flex gap-2">
+              <button class="px-3 py-2 rounded-xl bg-regen-green text-white text-sm hover:opacity-95" data-action="enroll-training">Inscrever-se</button>
+              <a class="px-3 py-2 rounded-xl border border-slate-200 text-sm hover:bg-regen-bg" href="${escapeHtml(t.link)}">Abrir</a>
+            </div>
+          `;
+          grid.appendChild(div);
+        });
+      }
+
+      function renderSpecialMaterialSelect() {
+        const sel = $("#specialMaterial");
+        sel.innerHTML = "";
+        MATERIAL_TYPES.forEach((m) => {
+          const opt = document.createElement("option");
+          opt.value = m.key;
+          opt.textContent = m.label;
+          sel.appendChild(opt);
+        });
+      }
+
+      function renderMapFilterOptions() {
+        const sel = $("#filterType");
+        sel.innerHTML = `<option value="all">Todos os tipos</option>`;
+        MATERIAL_TYPES.forEach((m) => {
+          const opt = document.createElement("option");
+          opt.value = m.key;
+          opt.textContent = m.label;
+          sel.appendChild(opt);
+        });
+      }
+
+      function renderServiceArea() {
+        const c = state.crgr;
+        const chipsEl = $("#serviceAreaChips");
+        const hintEl = $("#serviceAreaHint");
+        chipsEl.innerHTML = "";
+
+        const chips = c.serviceArea?.chips || [];
+        chips.slice(0, 10).forEach((x) => {
+          const span = document.createElement("span");
+          span.className = "text-xs px-2 py-1 rounded-lg bg-white border border-slate-200 text-slate-700";
+          span.textContent = x;
+          chipsEl.appendChild(span);
+        });
+
+        hintEl.textContent = c.serviceArea?.hint || (c.serviceArea?.regiao ? `Região: ${c.serviceArea.regiao}` : "—");
+      }
+
+      function renderCRGR() {
+        const c = state.crgr;
+
+        $("#topbarCrgrShort").textContent = c.short;
+        $("#crgrName").textContent = c.name;
+        $("#crgrDesc").textContent = c.desc;
+        $("#crgrAddr").textContent = c.address;
+        $("#crgrHours").textContent = c.hours;
+        $("#crgrContact").textContent = c.contact;
+
+        $("#sidebarCrgrName").textContent = c.name;
+        $("#sidebarCrgrAddr").textContent = c.address;
+
+        const status = isOpenNow();
+        $("#sidebarStatus").textContent = status;
+
+        $("#crgrTagPill").textContent = c.tag || "Regenera";
+
+        $("#crgrStatusPill").textContent = status;
+        $("#crgrStatusPill").className =
+          "text-xs px-2 py-1 rounded-lg border " +
+          (status.includes("Aberta")
+            ? "bg-regen-green/10 border-regen-green/25 text-regen-green"
+            : "bg-regen-bg border-slate-200 text-slate-600");
+
+        $("#btnDirections").href = `https://www.google.com/maps?q=${encodeURIComponent(c.address)}`;
+
+        // KPIs (demo)
+        $("#kpiUsers").textContent = String(120 + (c.points?.length || 0) * 7);
+        $("#kpiSpecial").textContent = String(state.specialRequests.filter((r) => r.crgrId === c.id).length);
+        $("#kpiTickets").textContent = String(state.tickets.filter((t) => t.crgrId === c.id && t.status === "aberto").length);
+        $("#kpiTrainings").textContent = String((c.trainings || []).length);
+
+        // Quick cards
+        const nextPickup = getNextPickup(c.pickups);
+        $("#cardNextPickup").textContent = nextPickup
+          ? `${formatDateTime(nextPickup.date)} • ${nextPickup.area}`
+          : "Sem eventos cadastrados";
+        $("#cardPointsCount").textContent = `${(c.points || []).length} ponto(s) mapeado(s)`;
+        $("#cardTrainingsCount").textContent = `${(c.trainings || []).length} treinamento(s)`;
+
+        // Overview summary
+        $("#summaryAccepted").textContent = String((c.accepted || []).length);
+        $("#summaryNotAccepted").textContent = String((c.notAccepted || []).length);
+        $("#summaryPoints").textContent = String((c.points || []).length);
+
+        renderServiceArea();
+        renderNotices();
+        renderServices();
+        renderCalendar();
+        renderTrainings();
+        renderSpecialMaterialSelect();
+        renderMapFilterOptions();
+
+        refreshMap();
+        renderPointsList();
+        renderSpecialRequestsList();
+        renderTicketsList();
+        renderCooperativasMenu();
+      }
+
+      /***********************
+       * MAPA (Leaflet)
+       ***********************/
+      function initMap() {
+        const c = state.crgr;
+        if (!window.L) return;
+
+        state.map = L.map("map", { scrollWheelZoom: false }).setView([c.lat, c.lng], 13);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "&copy; OpenStreetMap",
+        }).addTo(state.map);
+
+        state.markerLayer = L.layerGroup().addTo(state.map);
+
+        // Marker CRGR
+        const crgrMarker = L.marker([c.lat, c.lng]).addTo(state.map);
+        crgrMarker.bindPopup(`<b>${escapeHtml(c.name)}</b><br/>${escapeHtml(c.address)}`);
+
+        refreshMap();
+      }
+
+      function refreshMap() {
+        if (!state.map || !state.markerLayer) return;
+
+        const c = state.crgr;
+        const type = $("#filterType")?.value || "all";
+
+        state.markerLayer.clearLayers();
+
+        const filtered = (c.points || []).filter((p) => (type === "all" ? true : (p.types || []).includes(type)));
+
+        filtered.forEach((p) => {
+          const m = L.marker([p.lat, p.lng]);
+          m.bindPopup(
+            `<b>${escapeHtml(p.name)}</b><br/>${escapeHtml(p.address)}<br/><span style="font-size:12px;color:#475569">${escapeHtml(p.hours || "")}</span>`
+          );
+          m.on("click", () => highlightPointCard(p.id));
+          state.markerLayer.addLayer(m);
+        });
+
+        $("#pointsBadge").textContent = String(filtered.length);
+        renderPointsList(filtered);
+      }
+
+      function renderPointsList(forcedList = null) {
+        const c = state.crgr;
+        const type = $("#filterType")?.value || "all";
+        const list =
+          forcedList ?? (c.points || []).filter((p) => (type === "all" ? true : (p.types || []).includes(type)));
+
+        const el = $("#pointsList");
+        el.innerHTML = "";
+
+        if (!list.length) {
+          el.innerHTML = `
+            <div class="text-sm text-slate-600">
+              Nenhum ponto cadastrado para esta CRGR.
+              <div class="mt-2 text-xs text-slate-500">A gestão pode publicar pontos conforme o mapeamento do território.</div>
+            </div>`;
+          return;
+        }
+
+        list.forEach((p) => {
+          const div = document.createElement("div");
+          div.className =
+            "rounded-2xl border border-slate-200 p-3 hover:bg-regen-bg cursor-pointer transition shadow-sm";
+          div.id = `point-card-${p.id}`;
+          div.innerHTML = `
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <div class="text-sm font-semibold text-regen-blue">${escapeHtml(p.name)}</div>
+                <div class="text-xs text-slate-600 mt-1">${escapeHtml(p.address)}</div>
+                <div class="text-xs text-slate-500 mt-1">${escapeHtml(p.hours || "")}</div>
+              </div>
+              <span class="text-xs px-2 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 whitespace-nowrap">PEV</span>
+            </div>
+            <div class="mt-2 flex flex-wrap gap-1">
+              ${(p.types || []).map((t) => `<span class="text-[11px] px-2 py-1 rounded-lg bg-white border border-slate-200 text-slate-700">${escapeHtml(labelForType(t))}</span>`).join("")}
+            </div>
+            <div class="mt-3 flex gap-2">
+              <button class="px-2 py-1 rounded-lg border border-slate-200 text-xs hover:bg-white" data-action="zoom-point" data-id="${escapeHtml(p.id)}">Ver no mapa</button>
+              <a class="px-2 py-1 rounded-lg bg-regen-blue text-white text-xs hover:opacity-95" target="_blank" rel="noopener"
+                 href="https://www.google.com/maps?q=${encodeURIComponent(p.lat + "," + p.lng)}">Rotas</a>
+            </div>
+          `;
+          div.addEventListener("click", (e) => {
+            if (e.target?.dataset?.action) return;
+            if (state.map) state.map.setView([p.lat, p.lng], 16);
+          });
+          el.appendChild(div);
+        });
+      }
+
+      function highlightPointCard(pointId) {
+        const el = document.getElementById(`point-card-${pointId}`);
+        if (!el) return;
+        el.classList.add("ring-2", "ring-regen-green");
+        el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        setTimeout(() => el.classList.remove("ring-2", "ring-regen-green"), 1200);
+      }
+
+      async function useMyLocation() {
+        if (!navigator.geolocation) return toast("Geolocalização não disponível.");
+        try {
+          const pos = await new Promise((resolve, reject) =>
+            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 8000 })
+          );
+          const { latitude, longitude } = pos.coords;
+
+          if (state.map) {
+            if (state.userMarker) state.userMarker.remove();
+            state.userMarker = L.marker([latitude, longitude]).addTo(state.map);
+            state.userMarker.bindPopup("<b>Você está aqui</b>").openPopup();
+            state.map.setView([latitude, longitude], 15);
+          }
+        } catch {
+          toast("Não foi possível obter sua localização.");
+        }
+      }
+
+      /***********************
+       * SPECIAL REQUESTS (demo)
+       ***********************/
+      function renderSpecialRequestsList() {
+        const el = $("#specialRequestsList");
+        const list = state.specialRequests.filter((r) => r.crgrId === state.crgr.id).slice().reverse();
+
+        el.innerHTML = "";
+        if (!list.length) {
+          el.innerHTML = `<div class="px-4 py-4 text-sm text-slate-600">Você ainda não enviou solicitações para esta CRGR.</div>`;
+          $("#kpiSpecial").textContent = "0";
+          return;
+        }
+
+        list.forEach((r) => {
+          const row = document.createElement("div");
+          row.className = "px-4 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3";
+          row.innerHTML = `
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs px-2 py-1 rounded-lg bg-regen-green/10 border border-regen-green/25 text-regen-green">Especial</span>
+                <div class="text-sm font-semibold text-regen-blue">${escapeHtml(r.protocol)}</div>
+                <span class="text-xs px-2 py-1 rounded-lg bg-regen-bg border border-slate-200 text-slate-600">${escapeHtml(r.status)}</span>
+              </div>
+              <div class="mt-1 text-sm text-slate-700">${escapeHtml(labelForType(r.material))} • ${escapeHtml(r.volume)}</div>
+              <div class="mt-1 text-xs text-slate-600">${escapeHtml(r.address)}</div>
+            </div>
+            <div class="text-xs text-slate-500">${new Date(r.createdAt).toLocaleString("pt-BR")}</div>
+          `;
+          el.appendChild(row);
+        });
+
+        $("#kpiSpecial").textContent = String(list.length);
+      }
+
+      /***********************
+       * TICKETS (demo)
+       ***********************/
+      function renderTicketsList() {
+        const el = $("#ticketsList");
+        const list = state.tickets.filter((t) => t.crgrId === state.crgr.id).slice().reverse();
+
+        el.innerHTML = "";
+        if (!list.length) {
+          el.innerHTML = `<div class="px-4 py-4 text-sm text-slate-600">Você ainda não abriu protocolos para esta CRGR.</div>`;
+          $("#kpiTickets").textContent = "0";
+          return;
+        }
+
+        list.forEach((t) => {
+          const row = document.createElement("div");
+          row.className = "px-4 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3";
+          row.innerHTML = `
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs px-2 py-1 rounded-lg bg-regen-bg border border-slate-200 text-slate-700">${escapeHtml(t.type)}</span>
+                <div class="text-sm font-semibold text-regen-blue">${escapeHtml(t.protocol)} — ${escapeHtml(t.subject)}</div>
+                <span class="text-xs px-2 py-1 rounded-lg border ${
+                  t.status === "aberto"
+                    ? "bg-regen-yellow/20 border-regen-yellow text-regen-graphite"
+                    : "bg-regen-green/10 border-regen-green/25 text-regen-green"
+                }">${escapeHtml(t.status)}</span>
+              </div>
+              <div class="mt-1 text-sm text-slate-700">${escapeHtml(t.message)}</div>
+            </div>
+            <div class="text-xs text-slate-500">${new Date(t.createdAt).toLocaleString("pt-BR")}</div>
+          `;
+          el.appendChild(row);
+        });
+
+        $("#kpiTickets").textContent = String(list.filter((x) => x.status === "aberto").length);
+      }
+
+      /***********************
+       * SWITCH CRGR
+       ***********************/
+      function switchCRGR(crgrId) {
+        const found = CRGRS.find((c) => c.id === crgrId);
+        if (!found) return;
+
+        state.crgr = found;
+
+        // recria mapa para centralizar corretamente
+        if (state.map) {
+          state.map.remove();
+          state.map = null;
+          state.markerLayer = null;
+          state.userMarker = null;
+        }
+
+        renderCRGR();
+        waitForLeafletThenInitMap();
+
+        toast(`CRGR selecionada: ${found.short}`);
+      }
+
+      function waitForLeafletThenInitMap() {
+        const triesMax = 40;
+        let tries = 0;
+        const tick = () => {
+          tries++;
+          if (window.L) return initMap();
+          if (tries < triesMax) setTimeout(tick, 100);
+        };
+        tick();
+      }
+
+      /***********************
+       * EVENTS
+       ***********************/
+      function bindEvents() {
+        // Tabs
+        $$(".tab-btn").forEach((btn) => btn.addEventListener("click", () => setActiveTab(btn.dataset.tab)));
+        $$("[data-open-tab]").forEach((btn) => btn.addEventListener("click", () => setActiveTab(btn.dataset.openTab)));
+
+        // Dropdown cooperativas
+        $("#btnCooperativas").addEventListener("click", (e) => {
+          e.stopPropagation();
+          toggleCooperativasMenu();
+        });
+        document.addEventListener("click", () => closeCooperativasMenu());
+        $("#cooperativasMenu").addEventListener("click", (e) => e.stopPropagation());
+
+        // Filters
+        $("#filterType").addEventListener("change", () => refreshMap());
+        $("#btnUseMyLocation").addEventListener("click", () => useMyLocation());
+        $("#filterPickupType").addEventListener("change", renderCalendar);
+        $("#filterPickupQuery").addEventListener("input", renderCalendar);
+        $("#filterTraining").addEventListener("input", renderTrainings);
+
+        // Calendar actions
+        $("#calendarList").addEventListener("click", (e) => {
+          const btn = e.target.closest("button");
+          if (!btn) return;
+          const action = btn.dataset.action;
+          if (action === "remind") toast("Lembrete (demo): em produção vira notificação/agenda.");
+          if (action === "share") toast("Compartilhar (demo): em produção gera link/WhatsApp.");
+        });
+
+        // Points list actions
+        $("#pointsList").addEventListener("click", (e) => {
+          const btn = e.target.closest("[data-action]");
+          if (!btn) return;
+          if (btn.dataset.action === "zoom-point") {
+            const id = btn.dataset.id;
+            const p = (state.crgr.points || []).find((x) => x.id === id);
+            if (p && state.map) {
+              state.map.setView([p.lat, p.lng], 16);
+              highlightPointCard(p.id);
+            }
+          }
+        });
+
+        // Special form
+        $("#specialForm").addEventListener("submit", (e) => {
+          e.preventDefault();
+          const req = {
+            protocol: makeProtocol("ESP"),
+            crgrId: state.crgr.id,
+            name: $("#specialName").value.trim(),
+            phone: $("#specialPhone").value.trim(),
+            address: $("#specialAddress").value.trim(),
+            material: $("#specialMaterial").value,
+            volume: $("#specialVolume").value,
+            notes: $("#specialNotes").value.trim(),
+            status: "em análise",
+            createdAt: Date.now(),
+          };
+          state.specialRequests.push(req);
+
+          $("#specialResult").innerHTML = `
+            <div class="p-3 rounded-2xl border border-regen-green/25 bg-regen-green/10 text-regen-green text-sm">
+              Solicitação enviada com sucesso. Protocolo: <b>${escapeHtml(req.protocol)}</b>
+            </div>
+          `;
+          e.target.reset();
+          renderSpecialRequestsList();
+          toast("Solicitação registrada (demo).");
+        });
+
+        $("#btnViewMySpecialRequests").addEventListener("click", () => {
+          $("#specialRequestsList").scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+
+        // Ticket form
+        $("#ticketForm").addEventListener("submit", (e) => {
+          e.preventDefault();
+          const t = {
+            protocol: makeProtocol("OUV"),
+            crgrId: state.crgr.id,
+            type: $("#ticketType").value,
+            subject: $("#ticketSubject").value.trim(),
+            message: $("#ticketMessage").value.trim(),
+            status: "aberto",
+            createdAt: Date.now(),
+          };
+          state.tickets.push(t);
+
+          $("#ticketResult").innerHTML = `
+            <div class="p-3 rounded-2xl border border-regen-blue/25 bg-regen-blue/10 text-regen-blue text-sm">
+              Protocolo aberto. Número: <b>${escapeHtml(t.protocol)}</b>
+            </div>
+          `;
+          e.target.reset();
+          renderTicketsList();
+          toast("Protocolo registrado (demo).");
+        });
+
+        $("#btnViewMyTickets").addEventListener("click", () => {
+          $("#ticketsList").scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+
+        // Training enroll
+        $("#trainingsGrid").addEventListener("click", (e) => {
+          const btn = e.target.closest("button[data-action='enroll-training']");
+          if (!btn) return;
+          toast("Inscrição realizada (demo). Em produção, salvar progresso do usuário.");
+        });
+      }
+
+      /***********************
+       * BOOT
+       ***********************/
+      (function boot() {
+        setActiveTab("tab-overview");
+        renderCooperativasMenu();
+        bindEvents();
+        renderCRGR();
+        waitForLeafletThenInitMap();
+      })();
+    </script>
+  </body>
 </html>

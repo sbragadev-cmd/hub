@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hub Resiliência Climática — Perfil</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              green: "#1B7F5A",
+              green2: "#4CAF8F",
+              blue: "#0D3B66",
+              yellow: "#F2C94C",
+              graphite: "#2E2E2E",
+              bg: "#F5F7F6"
+            }
+          },
+          boxShadow: {
+            soft: "0 12px 30px rgba(13,59,102,0.10)",
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-brand-bg text-brand-graphite">
+  <!-- Topbar -->
+  <header class="sticky top-0 z-40 border-b border-black/5 bg-white/90 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+      <div class="flex items-center gap-3">
+        <button id="openSidebar" class="md:hidden rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold hover:bg-black/[0.02]">☰</button>
+
+        <div class="h-9 w-9 rounded-xl bg-brand-blue text-white grid place-items-center font-semibold">HR</div>
+        <div>
+          <div class="text-sm font-semibold leading-4">Hub Resiliência Climática</div>
+          <div class="text-xs text-black/50">Perfil do usuário</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <div class="relative">
+          <button id="coopBtn" class="inline-flex items-center gap-2 rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-medium hover:bg-black/[0.02]">
+            <span id="coopLabel">Cooperativas</span>
+            <span class="text-black/40">▼</span>
+          </button>
+
+          <div id="coopMenu" class="absolute right-0 mt-2 hidden w-80 rounded-2xl border border-black/10 bg-white p-2 shadow-soft">
+            <div class="px-3 py-2 text-xs font-semibold text-black/50">Selecione uma unidade</div>
+            <button data-coop data-coop-label="UT / CRGR Vila Pinto" class="w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-black/[0.02]">
+              UT / CRGR Vila Pinto — Bom Jesus (POA)
+            </button>
+            <button data-coop data-coop-label="UT / CRGR COOADESC" class="w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-black/[0.02]">
+              UT / CRGR COOADESC — Farrapos (POA)
+            </button>
+            <button data-coop data-coop-label="(Terceira unidade)" class="w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-black/[0.02]">
+              (Terceira unidade) — a definir
+            </button>
+          </div>
+        </div>
+
+        <a href="perfil.html" class="inline-flex items-center gap-2 rounded-xl bg-brand-green px-3 py-2 text-sm font-semibold text-white hover:opacity-95">
+          Perfil <span aria-hidden="true">👤</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div id="sidebarOverlay" class="fixed inset-0 z-40 hidden bg-black/40 md:hidden"></div>
+
+  <aside id="sidebar"
+    class="fixed left-0 top-0 z-50 h-full w-72 -translate-x-full border-r border-black/10 bg-white p-4 shadow-soft transition md:static md:z-auto md:h-auto md:w-72 md:translate-x-0 md:shadow-none">
+    <div class="flex items-center justify-between md:hidden">
+      <div class="text-sm font-semibold">Menu</div>
+      <button id="closeSidebar" class="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold hover:bg-black/[0.02]">✕</button>
+    </div>
+
+    <div class="mt-4 flex items-center gap-3 rounded-2xl bg-brand-bg p-3">
+      <div class="h-12 w-12 rounded-2xl bg-brand-blue text-white grid place-items-center font-semibold">SB</div>
+      <div class="min-w-0">
+        <div class="truncate text-sm font-semibold">Sizenando Braga</div>
+        <div class="truncate text-xs text-black/50">liderança comunitária</div>
+      </div>
+    </div>
+
+    <nav class="mt-4 space-y-1">
+      <a data-nav href="index.html" class="block rounded-xl px-3 py-2 text-sm hover:bg-black/[0.02]">Painel / Feed</a>
+      <a data-nav href="#" class="block rounded-xl px-3 py-2 text-sm hover:bg-black/[0.02]">Conteúdos</a>
+      <a data-nav href="#" class="block rounded-xl px-3 py-2 text-sm hover:bg-black/[0.02]">Trilhas formativas</a>
+      <a data-nav href="#" class="block rounded-xl px-3 py-2 text-sm hover:bg-black/[0.02]">Território</a>
+      <a data-nav href="#" class="block rounded-xl px-3 py-2 text-sm hover:bg-black/[0.02]">Documentos</a>
+      <a data-nav href="#" class="block rounded-xl px-3 py-2 text-sm hover:bg-black/[0.02]">Fale com o Hub</a>
+
+      <div class="my-3 border-t border-black/10"></div>
+      <a data-nav href="perfil.html" class="block rounded-xl px-3 py-2 text-sm hover:bg-black/[0.02]">Perfil</a>
+      <a data-nav href="#" class="block rounded-xl px-3 py-2 text-sm text-rose-600 hover:bg-rose-50">Sair</a>
+    </nav>
+  </aside>
+
+  <main class="md:ml-72">
+    <div class="mx-auto max-w-7xl px-4 py-6">
+      <!-- Header do perfil -->
+      <div class="rounded-2xl border border-black/10 bg-white p-5 shadow-soft">
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div class="flex items-center gap-4">
+            <div class="h-14 w-14 rounded-2xl bg-brand-blue text-white grid place-items-center text-lg font-semibold">SB</div>
+            <div>
+              <div class="text-lg font-semibold leading-6">Sizenando Braga</div>
+              <div class="text-sm text-black/50">sizenando@email.com • (51) 9xxxx-xxxx</div>
+              <div class="mt-2 inline-flex items-center gap-2 rounded-full bg-brand-green2/15 px-3 py-1 text-xs font-semibold text-brand-green">
+                Perfil: Liderança Comunitária
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button id="editProfileBtn" class="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold hover:bg-black/[0.02]">Editar</button>
+            <button id="saveProfileBtn" class="hidden rounded-xl bg-brand-green px-3 py-2 text-sm font-semibold text-white hover:opacity-95">Salvar</button>
+            <button id="cancelProfileBtn" class="hidden rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold hover:bg-black/[0.02]">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 grid gap-4 lg:grid-cols-[260px_1fr]">
+        <!-- Menu interno -->
+        <aside class="rounded-2xl border border-black/10 bg-white p-3 shadow-soft">
+          <div class="px-2 pb-2 text-xs font-semibold text-black/50">Seções do perfil</div>
+
+          <div class="lg:hidden">
+            <select id="profileMobileSection" class="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm">
+              <option value="dados">Dados pessoais</option>
+              <option value="vinculos">Vínculos e papéis</option>
+              <option value="territorio">Meu território</option>
+              <option value="preferencias">Preferências</option>
+              <option value="notificacoes">Notificações</option>
+              <option value="seguranca">Segurança</option>
+              <option value="atividade">Atividade</option>
+            </select>
+          </div>
+
+          <div class="mt-3 hidden lg:block space-y-1">
+            <button class="pnav w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-black/[0.02]" data-ptarget="dados">Dados pessoais</button>
+            <button class="pnav w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-black/[0.02]" data-ptarget="vinculos">Vínculos e papéis</button>
+            <button class="pnav w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-black/[0.02]" data-ptarget="territorio">Meu território</button>
+            <button class="pnav w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-black/[0.02]" data-ptarget="preferencias">Preferências</button>
+            <button class="pnav w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-black/[0.02]" data-ptarget="notificacoes">Notificações</button>
+            <button class="pnav w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-black/[0.02]" data-ptarget="seguranca">Segurança</button>
+            <button class="pnav w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-black/[0.02]" data-ptarget="atividade">Atividade</button>
+          </div>
+        </aside>
+
+        <!-- Seções -->
+        <section class="space-y-4">
+          <div id="psec-dados" class="psec rounded-2xl border border-black/10 bg-white p-5 shadow-soft">
+            <div class="flex items-center justify-between">
+              <h2 class="text-base font-semibold">Dados pessoais</h2>
+              <span class="text-xs text-black/50">Atualize suas informações</span>
+            </div>
+
+            <div class="mt-4 grid gap-3 md:grid-cols-2">
+              <div>
+                <label class="text-xs font-semibold text-black/60">Nome completo</label>
+                <input data-editable="true" disabled value="Sizenando Braga"
+                  class="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm disabled:bg-brand-bg" />
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-black/60">Nome social (opcional)</label>
+                <input data-editable="true" disabled placeholder="—"
+                  class="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm disabled:bg-brand-bg" />
+              </div>
+
+              <div>
+                <label class="text-xs font-semibold text-black/60">Email</label>
+                <input disabled value="sizenando@email.com"
+                  class="mt-1 w-full rounded-xl border border-black/10 bg-brand-bg px-3 py-2 text-sm" />
+                <div class="mt-1 text-xs text-black/50">Email pode exigir confirmação para alteração.</div>
+              </div>
+
+              <div>
+                <label class="text-xs font-semibold text-black/60">Telefone/WhatsApp</label>
+                <input data-editable="true" disabled value="(51) 9xxxx-xxxx"
+                  class="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm disabled:bg-brand-bg" />
+              </div>
+
+              <div>
+                <label class="text-xs font-semibold text-black/60">Cidade/UF</label>
+                <input data-editable="true" disabled value="Porto Alegre/RS"
+                  class="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm disabled:bg-brand-bg" />
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="text-xs font-semibold text-black/60">Mini bio (opcional)</label>
+                <textarea data-editable="true" disabled rows="3" placeholder="Fale um pouco sobre você..."
+                  class="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm disabled:bg-brand-bg"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div id="psec-vinculos" class="psec hidden rounded-2xl border border-black/10 bg-white p-5 shadow-soft">
+            <div class="flex items-center justify-between">
+              <h2 class="text-base font-semibold">Vínculos e papéis</h2>
+              <button id="openVinculoModal" class="rounded-xl bg-brand-green px-3 py-2 text-sm font-semibold text-white hover:opacity-95">
+                + Adicionar vínculo
+              </button>
+            </div>
+
+            <div class="mt-4 grid gap-3 md:grid-cols-2">
+              <div>
+                <label class="text-xs font-semibold text-black/60">Papel principal</label>
+                <select class="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm">
+                  <option>comunidade</option>
+                  <option selected>liderança comunitária</option>
+                  <option>técnico</option>
+                  <option>gestor</option>
+                  <option>administrador</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-xs font-semibold text-black/60">Status</label>
+                <div class="mt-2 inline-flex items-center gap-2 rounded-full bg-brand-green2/15 px-3 py-1 text-xs font-semibold text-brand-green">
+                  Ativo
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 overflow-hidden rounded-2xl border border-black/10">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-brand-bg text-xs font-semibold text-black/60">
+                  <tr>
+                    <th class="px-4 py-3">Organização</th>
+                    <th class="px-4 py-3">Função</th>
+                    <th class="px-4 py-3">Situação</th>
+                    <th class="px-4 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody id="vinculosTbody" class="divide-y divide-black/10">
+                  <tr>
+                    <td class="px-4 py-3">
+                      <div class="font-semibold">UT / CRGR Vila Pinto</div>
+                      <div class="text-xs text-black/50">Bom Jesus — Porto Alegre</div>
+                    </td>
+                    <td class="px-4 py-3">Coordenação</td>
+                    <td class="px-4 py-3">
+                      <span class="rounded-full bg-brand-green2/15 px-2 py-1 text-xs font-semibold text-brand-green">ATIVO</span>
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                      <button class="rounded-xl border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-black/[0.02]" onclick="removeRow(this)">
+                        Remover
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="mt-2 text-xs text-black/50">
+              * Alguns vínculos podem exigir aprovação do gestor/admin.
+            </div>
+          </div>
+
+          <div id="psec-territorio" class="psec hidden rounded-2xl border border-black/10 bg-white p-5 shadow-soft">
+            <div class="flex items-center justify-between">
+              <h2 class="text-base font-semibold">Meu território</h2>
+              <button class="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold hover:bg-black/[0.02]">
+                Ver página do território
+              </button>
+            </div>
+
+            <div class="mt-4 grid gap-3 md:grid-cols-2">
+              <div>
+                <label class="text-xs font-semibold text-black/60">Território selecionado</label>
+                <select class="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm">
+                  <option selected>Vila Pinto (Bom Jesus) — Porto Alegre</option>
+                  <option>Farrapos — Porto Alegre</option>
+                  <option>(Outro) — a definir</option>
+                </select>
+              </div>
+
+              <div class="rounded-2xl bg-brand-bg p-4">
+                <div class="text-xs font-semibold text-black/50">Atalhos</div>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <button class="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm hover:bg-black/[0.02]">Comunicados locais</button>
+                  <button class="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm hover:bg-black/[0.02]">Ações em andamento</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="psec-preferencias" class="psec hidden rounded-2xl border border-black/10 bg-white p-5 shadow-soft">
+            <h2 class="text-base font-semibold">Preferências</h2>
+
+            <div class="mt-4 grid gap-3 md:grid-cols-2">
+              <div class="rounded-2xl border border-black/10 p-4">
+                <div class="text-sm font-semibold">Acessibilidade</div>
+                <div class="mt-2 text-sm text-black/60">Tamanho do texto</div>
+                <div class="mt-2 flex gap-2">
+                  <button class="rounded-xl bg-brand-green2/15 px-3 py-2 text-sm font-semibold text-brand-green hover:opacity-95">Normal</button>
+                  <button class="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm hover:bg-black/[0.02]">Grande</button>
+                </div>
+              </div>
+
+              <div class="rounded-2xl border border-black/10 p-4">
+                <div class="text-sm font-semibold">Tema</div>
+                <div class="mt-2 text-sm text-black/60">Modo de exibição</div>
+                <div class="mt-2 flex gap-2">
+                  <button class="rounded-xl bg-brand-green2/15 px-3 py-2 text-sm font-semibold text-brand-green hover:opacity-95">Claro</button>
+                  <button class="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm hover:bg-black/[0.02]">Escuro (em breve)</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="psec-notificacoes" class="psec hidden rounded-2xl border border-black/10 bg-white p-5 shadow-soft">
+            <h2 class="text-base font-semibold">Notificações</h2>
+
+            <div class="mt-4 grid gap-3 md:grid-cols-2">
+              <div class="rounded-2xl border border-black/10 p-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-sm font-semibold">Comunicados do Hub</div>
+                    <div class="text-xs text-black/50">Atualizações gerais do projeto</div>
+                  </div>
+                  <input type="checkbox" class="h-5 w-5 accent-[#1B7F5A]" checked />
+                </div>
+              </div>
+
+              <div class="rounded-2xl border border-black/10 p-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-sm font-semibold">Alerta climático</div>
+                    <div class="text-xs text-black/50">Avisos e emergências</div>
+                  </div>
+                  <input type="checkbox" class="h-5 w-5 accent-[#1B7F5A]" checked />
+                </div>
+              </div>
+
+              <div class="rounded-2xl border border-black/10 p-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-sm font-semibold">Novos conteúdos</div>
+                    <div class="text-xs text-black/50">Biblioteca e cartilhas</div>
+                  </div>
+                  <input type="checkbox" class="h-5 w-5 accent-[#1B7F5A]" />
+                </div>
+              </div>
+
+              <div class="rounded-2xl border border-black/10 p-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-sm font-semibold">Trilhas formativas</div>
+                    <div class="text-xs text-black/50">Progresso e conclusão</div>
+                  </div>
+                  <input type="checkbox" class="h-5 w-5 accent-[#1B7F5A]" checked />
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3 text-xs text-black/50">
+              Canais avançados (WhatsApp/SMS) podem ser integrados depois.
+            </div>
+          </div>
+
+          <div id="psec-seguranca" class="psec hidden rounded-2xl border border-black/10 bg-white p-5 shadow-soft">
+            <h2 class="text-base font-semibold">Segurança</h2>
+
+            <div class="mt-4 grid gap-3 md:grid-cols-2">
+              <div>
+                <label class="text-xs font-semibold text-black/60">Senha atual</label>
+                <input type="password" class="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm" placeholder="••••••••" />
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-black/60">Nova senha</label>
+                <input type="password" class="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm" placeholder="••••••••" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="text-xs font-semibold text-black/60">Confirmar nova senha</label>
+                <input type="password" class="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm" placeholder="••••••••" />
+              </div>
+            </div>
+
+            <div class="mt-4 flex gap-2">
+              <button class="rounded-xl bg-brand-green px-3 py-2 text-sm font-semibold text-white hover:opacity-95">Alterar senha</button>
+              <button class="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold hover:bg-black/[0.02]">Encerrar sessões</button>
+            </div>
+          </div>
+
+          <div id="psec-atividade" class="psec hidden rounded-2xl border border-black/10 bg-white p-5 shadow-soft">
+            <div class="flex items-center justify-between">
+              <h2 class="text-base font-semibold">Atividade</h2>
+              <button class="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold hover:bg-black/[0.02]">Ver tudo</button>
+            </div>
+
+            <div class="mt-4 space-y-3">
+              <div class="rounded-2xl bg-brand-bg p-4">
+                <div class="text-xs text-black/50">Hoje</div>
+                <div class="mt-1 text-sm font-semibold">Acessou a trilha “Introdução à Gestão de Resíduos”</div>
+                <div class="text-sm text-black/60">Status: em andamento</div>
+              </div>
+
+              <div class="rounded-2xl bg-brand-bg p-4">
+                <div class="text-xs text-black/50">Ontem</div>
+                <div class="mt-1 text-sm font-semibold">Baixou “Cartilha de Coleta Seletiva Solidária”</div>
+                <div class="text-sm text-black/60">Biblioteca → Educação ambiental</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal adicionar vínculo -->
+  <div id="vinculoModal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
+    <div class="w-full max-w-lg rounded-2xl border border-black/10 bg-white p-5 shadow-soft">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-semibold">Adicionar vínculo</h3>
+        <button id="closeVinculoModal" class="rounded-xl border border-black/10 bg-white px-2 py-1 text-sm hover:bg-black/[0.02]">✕</button>
+      </div>
+
+      <div class="mt-4 grid gap-3">
+        <div>
+          <label class="text-xs font-semibold text-black/60">Organização</label>
+          <select id="orgSelect" class="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm">
+            <option>UT / CRGR Vila Pinto — Bom Jesus</option>
+            <option>UT / CRGR COOADESC — Farrapos</option>
+            <option>(Terceira unidade) — a definir</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-black/60">Função</label>
+          <input id="funcaoInput" class="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm" placeholder="Ex: cooperado, educador, coordenação..." />
+        </div>
+
+        <div class="rounded-2xl bg-brand-yellow/25 p-3 text-xs text-black/70">
+          Ao adicionar, o vínculo pode ficar como <b>pendente</b> até aprovação (se aplicável).
+        </div>
+
+        <div class="mt-2 flex justify-end gap-2">
+          <button id="cancelVinculo" class="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold hover:bg-black/[0.02]">Cancelar</button>
+          <button id="addVinculo" class="rounded-xl bg-brand-green px-3 py-2 text-sm font-semibold text-white hover:opacity-95">Adicionar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/hub.js"></script>
+  <script>
+    // Navegação interna do perfil
+    const pSections = ["dados","vinculos","territorio","preferencias","notificacoes","seguranca","atividade"];
+    const pNav = document.querySelectorAll(".pnav");
+    const pMobile = document.getElementById("profileMobileSection");
+
+    function showPSection(key) {
+      pSections.forEach(k => {
+        document.getElementById("psec-" + k).classList.toggle("hidden", k !== key);
+      });
+
+      pNav.forEach(btn => {
+        const active = btn.dataset.ptarget === key;
+        btn.classList.toggle("bg-brand-green", active);
+        btn.classList.toggle("text-white", active);
+        btn.classList.toggle("font-semibold", active);
+      });
+
+      if (pMobile) pMobile.value = key;
+    }
+
+    pNav.forEach(btn => btn.addEventListener("click", () => showPSection(btn.dataset.ptarget)));
+    if (pMobile) pMobile.addEventListener("change", (e) => showPSection(e.target.value));
+    showPSection("dados");
+
+    // Editar dados pessoais
+    const editBtn = document.getElementById("editProfileBtn");
+    const saveBtn = document.getElementById("saveProfileBtn");
+    const cancelBtn = document.getElementById("cancelProfileBtn");
+    const editableFields = document.querySelectorAll("[data-editable='true']");
+
+    function setEditing(isEditing) {
+      editableFields.forEach(el => el.disabled = !isEditing);
+      editBtn.classList.toggle("hidden", isEditing);
+      saveBtn.classList.toggle("hidden", !isEditing);
+      cancelBtn.classList.toggle("hidden", !isEditing);
+    }
+
+    editBtn.addEventListener("click", () => setEditing(true));
+    cancelBtn.addEventListener("click", () => setEditing(false));
+    saveBtn.addEventListener("click", () => { setEditing(false); alert("Perfil atualizado (mock) ✅"); });
+
+    // Modal vínculo
+    const modal = document.getElementById("vinculoModal");
+    const openModalBtn = document.getElementById("openVinculoModal");
+    const closeModalBtn = document.getElementById("closeVinculoModal");
+    const cancelVinculo = document.getElementById("cancelVinculo");
+    const addVinculoBtn = document.getElementById("addVinculo");
+    const vinculosTbody = document.getElementById("vinculosTbody");
+
+    function openModal() { modal.classList.remove("hidden"); modal.classList.add("flex"); }
+    function closeModal() { modal.classList.add("hidden"); modal.classList.remove("flex"); }
+
+    if (openModalBtn) openModalBtn.addEventListener("click", openModal);
+    closeModalBtn.addEventListener("click", closeModal);
+    cancelVinculo.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+
+    function removeRow(btn) {
+      const tr = btn.closest("tr");
+      if (confirm("Remover este vínculo?")) tr.remove();
+    }
+    window.removeRow = removeRow;
+
+    addVinculoBtn.addEventListener("click", () => {
+      const org = document.getElementById("orgSelect").value;
+      const funcao = document.getElementById("funcaoInput").value.trim() || "—";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="px-4 py-3">
+          <div class="font-semibold">${org.split("—")[0].trim()}</div>
+          <div class="text-xs text-black/50">${org.includes("—") ? org.split("—")[1].trim() : ""}</div>
+        </td>
+        <td class="px-4 py-3">${funcao}</td>
+        <td class="px-4 py-3">
+          <span class="rounded-full bg-brand-yellow/25 px-2 py-1 text-xs font-semibold text-brand-blue">PENDENTE</span>
+        </td>
+        <td class="px-4 py-3 text-right">
+          <button class="rounded-xl border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-black/[0.02]" onclick="removeRow(this)">Remover</button>
+        </td>
+      `;
+      vinculosTbody.appendChild(tr);
+
+      document.getElementById("funcaoInput").value = "";
+      closeModal();
+    });
+  </script>
+</body>
+</html>
