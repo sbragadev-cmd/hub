@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hub — Painel Público</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Efeitos extras (sem libs) */
+    .glow {
+      box-shadow: 0 10px 30px rgba(16,185,129,.18), 0 6px 18px rgba(59,130,246,.12);
+    }
+    .card-tilt:hover { transform: translateY(-4px) rotate(-0.2deg); }
+    .soft-shadow { box-shadow: 0 10px 30px rgba(2,6,23,.08); }
+    .shine {
+      position: relative; overflow: hidden;
+    }
+    .shine:before {
+      content:""; position:absolute; inset:-50%;
+      background: linear-gradient(120deg, transparent 40%, rgba(255,255,255,.45) 50%, transparent 60%);
+      transform: translateX(-60%) rotate(10deg);
+      transition: transform .8s ease;
+      pointer-events: none;
+    }
+    .shine:hover:before { transform: translateX(10%) rotate(10deg); }
+    .blob {
+      filter: blur(30px);
+      opacity: .75;
+      transform: translateZ(0);
+      animation: floaty 8s ease-in-out infinite;
+    }
+    @keyframes floaty {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(20px,-18px) scale(1.05); }
+    }
+    .fade-in { animation: fadeIn .35s ease both; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0);} }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100">
+  <!-- BACKGROUND DECOR -->
+  <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-emerald-500 blob"></div>
+    <div class="absolute top-20 -right-20 h-80 w-80 rounded-full bg-sky-500 blob" style="animation-delay:1.2s"></div>
+    <div class="absolute bottom-[-60px] left-1/3 h-72 w-72 rounded-full bg-fuchsia-500 blob" style="animation-delay:2.2s"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-950/95 to-slate-950"></div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-40 border-b border-white/10 bg-slate-950/65 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-400 via-sky-400 to-fuchsia-400 glow"></div>
+        <div class="leading-tight">
+          <div class="font-semibold tracking-wide">Hub Resiliência Climática</div>
+          <div class="text-xs text-slate-300">Conteúdos • Notícias • Territórios</div>
+        </div>
+      </div>
+
+      <div class="flex-1"></div>
+
+      <nav class="hidden md:flex items-center gap-2 text-sm text-slate-200">
+        <button class="px-3 py-2 rounded-xl hover:bg-white/10" data-nav="conteudos">📚 Conteúdos</button>
+        <button class="px-3 py-2 rounded-xl hover:bg-white/10" data-nav="noticias">📰 Notícias</button>
+        <button class="px-3 py-2 rounded-xl hover:bg-white/10" data-nav="territorios">🗺️ Territórios</button>
+        <button class="px-3 py-2 rounded-xl hover:bg-white/10" data-nav="sobre">✨ Sobre</button>
+      </nav>
+
+      <button class="ml-2 px-4 py-2 rounded-xl bg-white text-slate-950 font-semibold text-sm hover:bg-slate-100">
+        Entrar
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <!-- HERO -->
+    <section class="rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 soft-shadow overflow-hidden relative">
+      <div class="absolute inset-0 opacity-25">
+        <!-- pattern -->
+        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="p" width="60" height="60" patternUnits="userSpaceOnUse">
+              <circle cx="10" cy="10" r="1.5" fill="white" opacity=".35"/>
+              <circle cx="40" cy="30" r="1.5" fill="white" opacity=".25"/>
+              <circle cx="25" cy="50" r="1.5" fill="white" opacity=".2"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#p)"/>
+        </svg>
+      </div>
+
+      <div class="relative p-5 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs text-slate-200">
+            <span>🌱</span> Plataforma pública • Acesse agora
+          </div>
+          <h1 class="mt-3 text-2xl md:text-4xl font-extrabold leading-tight">
+            Um painel vivo do território:
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-sky-300 to-fuchsia-300">
+              conteúdos, notícias e ações
+            </span>
+            para mobilizar a comunidade.
+          </h1>
+          <p class="mt-3 text-slate-200/90">
+            Descubra materiais práticos, acompanhe comunicados e veja o que está acontecendo em cada território.
+          </p>
+
+          <div class="mt-5 flex flex-wrap gap-3">
+            <button id="ctaExplore" class="shine px-5 py-3 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100">
+              🚀 Explorar agora
+            </button>
+            <button id="ctaNews" class="px-5 py-3 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/15">
+              📰 Ver notícias
+            </button>
+            <button id="ctaTerr" class="px-5 py-3 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/15">
+              🗺️ Ver territórios
+            </button>
+          </div>
+
+          <div class="mt-5 grid grid-cols-3 gap-3">
+            <div class="rounded-2xl bg-white/10 border border-white/10 p-3">
+              <div class="text-xs text-slate-300">Atualizações</div>
+              <div class="text-lg font-bold" id="kpiAtualizacoes">—</div>
+              <div class="text-xs text-slate-300">no período</div>
+            </div>
+            <div class="rounded-2xl bg-white/10 border border-white/10 p-3">
+              <div class="text-xs text-slate-300">Conteúdos</div>
+              <div class="text-lg font-bold" id="kpiConteudos">—</div>
+              <div class="text-xs text-slate-300">disponíveis</div>
+            </div>
+            <div class="rounded-2xl bg-white/10 border border-white/10 p-3">
+              <div class="text-xs text-slate-300">Territórios</div>
+              <div class="text-lg font-bold" id="kpiTerritorios">—</div>
+              <div class="text-xs text-slate-300">ativos</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right illustration + images -->
+        <div class="relative">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="rounded-3xl overflow-hidden border border-white/10 bg-white/5 soft-shadow card-tilt transition">
+              <img class="h-44 w-full object-cover"
+                src="https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1200&q=70"
+                alt="Comunidade" />
+              <div class="p-3">
+                <div class="text-xs text-slate-300">📣 Mobilização</div>
+                <div class="font-semibold">Ações coletivas</div>
+              </div>
+            </div>
+
+            <div class="rounded-3xl overflow-hidden border border-white/10 bg-white/5 soft-shadow card-tilt transition" style="transition-duration:.25s">
+              <img class="h-44 w-full object-cover"
+                src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=70"
+                alt="Território" />
+              <div class="p-3">
+                <div class="text-xs text-slate-300">🗺️ Território</div>
+                <div class="font-semibold">Mapeamento</div>
+              </div>
+            </div>
+
+            <div class="col-span-2 rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-br from-emerald-500/20 via-sky-500/15 to-fuchsia-500/20 soft-shadow shine">
+              <div class="p-4 flex items-center justify-between gap-3">
+                <div>
+                  <div class="text-xs text-slate-200">⚡ Destaque</div>
+                  <div class="text-lg font-bold">Acesse materiais prontos para usar</div>
+                  <div class="text-sm text-slate-200/90">cartilhas, vídeos, checklists e comunicados</div>
+                </div>
+                <div class="hidden sm:flex items-center gap-2">
+                  <span class="px-3 py-2 rounded-2xl bg-white/10 border border-white/10">📄</span>
+                  <span class="px-3 py-2 rounded-2xl bg-white/10 border border-white/10">🎥</span>
+                  <span class="px-3 py-2 rounded-2xl bg-white/10 border border-white/10">✅</span>
+                  <span class="px-3 py-2 rounded-2xl bg-white/10 border border-white/10">📢</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="absolute -bottom-4 -right-4 hidden lg:block">
+            <div class="rounded-3xl bg-white/10 border border-white/10 p-3 soft-shadow">
+              <div class="text-xs text-slate-200">✨ Dica</div>
+              <div class="text-sm text-slate-200/90">Use os filtros para achar conteúdos por tema e território.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILTER + SEARCH -->
+    <section class="rounded-3xl border border-white/10 bg-white/5 soft-shadow p-4 md:p-6">
+      <div class="flex flex-col md:flex-row gap-3 md:items-end">
+        <div class="flex-1">
+          <div class="text-sm text-slate-200 font-semibold">🔎 Buscar e filtrar</div>
+          <div class="text-xs text-slate-300">Encontre conteúdos e notícias por tema, território e período.</div>
+        </div>
+
+        <div class="w-full md:w-[460px]">
+          <div class="flex items-center gap-2 bg-slate-900/60 border border-white/10 rounded-2xl px-3 py-2">
+            <span class="text-slate-300">🔍</span>
+            <input id="q" class="w-full bg-transparent outline-none text-sm text-slate-100 placeholder:text-slate-400"
+              placeholder="Buscar conteúdo, notícia, tema..." />
+            <button id="clearQ" class="text-xs px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15">Limpar</button>
+          </div>
+          <div id="hint" class="mt-2 text-xs text-slate-300 hidden"></div>
+        </div>
+      </div>
+
+      <div class="mt-5 grid grid-cols-1 md:grid-cols-5 gap-3">
+        <div>
+          <label class="text-xs text-slate-300">Território</label>
+          <select id="fTerritorio" class="mt-1 w-full text-sm bg-slate-900/60 border border-white/10 rounded-2xl px-3 py-2">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-slate-300">Tema</label>
+          <select id="fTema" class="mt-1 w-full text-sm bg-slate-900/60 border border-white/10 rounded-2xl px-3 py-2">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-slate-300">Tipo</label>
+          <select id="fTipo" class="mt-1 w-full text-sm bg-slate-900/60 border border-white/10 rounded-2xl px-3 py-2">
+            <option value="">Todos</option>
+            <option value="Conteúdo">Conteúdo</option>
+            <option value="Notícia">Notícia</option>
+            <option value="Evento">Evento</option>
+            <option value="Comunicado">Comunicado</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-slate-300">Período</label>
+          <select id="fPeriodo" class="mt-1 w-full text-sm bg-slate-900/60 border border-white/10 rounded-2xl px-3 py-2">
+            <option value="all">Tudo</option>
+            <option value="7">Últimos 7 dias</option>
+            <option value="30">Últimos 30 dias</option>
+            <option value="90">Últimos 90 dias</option>
+          </select>
+        </div>
+        <div class="flex items-end gap-2">
+          <button id="btnReset" class="w-full text-sm px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100">
+            🧹 Limpar
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN GRID -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- LEFT -->
+      <div class="lg:col-span-2 space-y-4" id="conteudosSection">
+        <!-- KPIs -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow">
+            <div class="text-xs text-slate-300">📰 Notícias (período)</div>
+            <div id="kpiNoticias" class="text-2xl font-extrabold mt-1">0</div>
+            <div class="text-xs text-slate-300 mt-1">publicadas</div>
+          </div>
+          <div class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow">
+            <div class="text-xs text-slate-300">📚 Conteúdos</div>
+            <div id="kpiConteudos2" class="text-2xl font-extrabold mt-1">0</div>
+            <div class="text-xs text-slate-300 mt-1">disponíveis</div>
+          </div>
+          <div class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow">
+            <div class="text-xs text-slate-300">🗺️ Territórios</div>
+            <div id="kpiTerritorios2" class="text-2xl font-extrabold mt-1">0</div>
+            <div class="text-xs text-slate-300 mt-1">ativos</div>
+          </div>
+          <div class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow">
+            <div class="text-xs text-slate-300">📅 Eventos (período)</div>
+            <div id="kpiEventos" class="text-2xl font-extrabold mt-1">0</div>
+            <div class="text-xs text-slate-300 mt-1">agendados</div>
+          </div>
+        </div>
+
+        <!-- Featured -->
+        <div class="rounded-3xl border border-white/10 bg-white/5 soft-shadow p-4 md:p-6">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div class="font-semibold text-lg">✨ Conteúdos em destaque</div>
+              <div class="text-sm text-slate-300">Escolhas rápidas para começar agora.</div>
+            </div>
+            <button id="toggleView" class="px-4 py-2 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/15 text-sm">
+              🔁 Alternar grade/lista
+            </button>
+          </div>
+          <div id="featured" class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+        </div>
+
+        <!-- Library -->
+        <div class="rounded-3xl border border-white/10 bg-white/5 soft-shadow p-4 md:p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-semibold text-lg">📦 Biblioteca</div>
+              <div class="text-sm text-slate-300">Filtrada por seus critérios.</div>
+            </div>
+            <div class="text-xs text-slate-300">Resultados: <span id="countResults">0</span></div>
+          </div>
+          <div id="results" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <aside class="space-y-4">
+        <!-- News -->
+        <div class="rounded-3xl border border-white/10 bg-white/5 soft-shadow p-4 md:p-6" id="noticiasSection">
+          <div class="flex items-center justify-between">
+            <div class="font-semibold text-lg">📰 Notícias</div>
+            <span class="text-xs text-slate-300">Atualizações</span>
+          </div>
+          <div id="news" class="mt-4 space-y-3"></div>
+        </div>
+
+        <!-- Territories -->
+        <div class="rounded-3xl border border-white/10 bg-white/5 soft-shadow p-4 md:p-6" id="territoriosSection">
+          <div class="flex items-center justify-between">
+            <div class="font-semibold text-lg">🗺️ Territórios</div>
+            <span class="text-xs text-slate-300">Clique para filtrar</span>
+          </div>
+          <div id="territorios" class="mt-4 space-y-2"></div>
+        </div>
+
+        <!-- Events -->
+        <div class="rounded-3xl border border-white/10 bg-white/5 soft-shadow p-4 md:p-6">
+          <div class="flex items-center justify-between">
+            <div class="font-semibold text-lg">📅 Próximos eventos</div>
+            <span class="text-xs text-slate-300">Agenda</span>
+          </div>
+          <div id="events" class="mt-4 space-y-3"></div>
+        </div>
+      </aside>
+    </section>
+
+    <footer class="py-10 text-center text-sm text-slate-300/80">
+      ✨ Hub • Área pública • Conteúdos, notícias e territórios
+    </footer>
+  </main>
+
+  <!-- MODAL -->
+  <div id="modal" class="fixed inset-0 hidden z-50">
+    <div class="absolute inset-0 bg-black/60"></div>
+    <div class="relative max-w-2xl mx-auto mt-12 bg-slate-950 border border-white/10 rounded-3xl soft-shadow overflow-hidden fade-in">
+      <div class="p-4 border-b border-white/10 flex items-start justify-between gap-3">
+        <div>
+          <div id="modalType" class="text-xs text-slate-300"></div>
+          <div id="modalTitle" class="text-lg md:text-xl font-extrabold"></div>
+          <div id="modalMeta" class="text-xs text-slate-300 mt-1"></div>
+        </div>
+        <button id="modalClose" class="px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold text-sm hover:bg-slate-100">Fechar</button>
+      </div>
+      <div class="p-4">
+        <div id="modalBody" class="text-sm text-slate-200 leading-relaxed"></div>
+        <div id="modalActions" class="mt-4 flex flex-wrap gap-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- MOCK DATA ----------
+    const territorios = [
+      { id: "porto-alegre", nome: "Porto Alegre", status: "Ações ativas", updatedAt: "2026-02-08", icon:"🏙️" },
+      { id: "canoas", nome: "Canoas", status: "Comunicados", updatedAt: "2026-02-06", icon:"🚲" },
+      { id: "gravatai", nome: "Gravataí", status: "Trilhas em curso", updatedAt: "2026-02-03", icon:"🌿" },
+      { id: "viamao", nome: "Viamão", status: "Ações ativas", updatedAt: "2026-01-28", icon:"🏞️" },
+    ];
+
+    const itens = [
+      // Conteúdos
+      {
+        id: "c1", tipo: "Conteúdo", subTipo: "📄 Cartilha (PDF)",
+        titulo: "Guia rápido: Gestão de Resíduos em Comunidades",
+        tema: "Resíduos", territorio: "Porto Alegre", publico: "Comunidade",
+        data: "2026-02-07", destaque: true,
+        resumo: "Passo a passo para organizar coleta, triagem e comunicação local.",
+        url: "#",
+        img: "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?auto=format&fit=crop&w=1200&q=70"
+      },
+      {
+        id: "c2", tipo: "Conteúdo", subTipo: "🎥 Vídeo",
+        titulo: "Introdução à Resiliência Climática no Território",
+        tema: "Clima", territorio: "Canoas", publico: "Geral",
+        data: "2026-02-02", destaque: true,
+        resumo: "Conceitos essenciais e exemplos práticos de adaptação comunitária.",
+        url: "#",
+        img: "https://images.unsplash.com/photo-1508780709619-79562169bc64?auto=format&fit=crop&w=1200&q=70"
+      },
+      {
+        id: "c3", tipo: "Conteúdo", subTipo: "✅ Checklist",
+        titulo: "Checklist de Comunicação de Risco para Lideranças",
+        tema: "Risco", territorio: "Gravataí", publico: "Liderança",
+        data: "2026-01-25", destaque: true,
+        resumo: "Modelo simples para avisos, fluxos de informação e pontos de apoio.",
+        url: "#",
+        img: "https://images.unsplash.com/photo-1526948128573-703ee1aeb6fa?auto=format&fit=crop&w=1200&q=70"
+      },
+      { id:"c4", tipo:"Conteúdo", subTipo:"📄 Cartilha (PDF)", titulo:"Educação Ambiental: oficinas rápidas (roteiros)",
+        tema:"Educação", territorio:"Viamão", publico:"Técnico", data:"2026-01-18", destaque:false,
+        resumo:"Roteiros práticos para oficinas com jovens e adultos.", url:"#",
+        img:"https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=70"
+      },
+
+      // Notícias
+      { id:"n1", tipo:"Notícia", titulo:"Mutirão no território: coleta seletiva e sensibilização",
+        tema:"Resíduos", territorio:"Porto Alegre", data:"2026-02-09", destaque:true,
+        resumo:"Ação reuniu moradores e lideranças com foco em triagem e descarte correto.",
+        corpo:"Aqui entra o texto completo da notícia (com fotos, links e materiais relacionados).",
+        img:"https://images.unsplash.com/photo-1520975661595-6453be3f7070?auto=format&fit=crop&w=1200&q=70"
+      },
+      { id:"n2", tipo:"Notícia", titulo:"Formação: trilha de resíduos inicia com 3 módulos",
+        tema:"Formação", territorio:"Canoas", data:"2026-02-04", destaque:false,
+        resumo:"Participantes iniciaram o módulo de base sobre gestão comunitária.",
+        corpo:"Conteúdo completo da notícia: programação, objetivos, materiais e próximos passos.",
+        img:"https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=70"
+      },
+
+      // Eventos
+      { id:"e1", tipo:"Evento", titulo:"Roda de conversa: riscos climáticos no território",
+        tema:"Risco", territorio:"Gravataí", data:"2026-02-20",
+        resumo:"Encontro aberto para mapear riscos e ações coletivas.", local:"Online" },
+      { id:"e2", tipo:"Evento", titulo:"Oficina prática: triagem e separação de resíduos",
+        tema:"Resíduos", territorio:"Porto Alegre", data:"2026-02-27",
+        resumo:"Demonstração com exemplos do cotidiano e materiais acessíveis.", local:"Presencial" },
+
+      // Comunicados
+      { id:"m1", tipo:"Comunicado", titulo:"Comunicado do Hub: atualização de materiais",
+        tema:"Institucional", territorio:"Todos", data:"2026-02-01",
+        resumo:"Novos PDFs e guias foram adicionados à biblioteca pública." }
+    ];
+
+    // ---------- HELPERS ----------
+    const $ = (id) => document.getElementById(id);
+    const parseDateISO = (s) => new Date(s + "T00:00:00");
+    const daysBetween = (a,b)=> Math.floor((a-b)/(1000*60*60*24));
+    const uniqueSorted = (arr)=> [...new Set(arr)].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+
+    const themeBadge = (tema) => {
+      const map = {
+        "Resíduos": "bg-amber-400/15 text-amber-200 border-amber-300/20",
+        "Clima": "bg-sky-400/15 text-sky-200 border-sky-300/20",
+        "Risco": "bg-fuchsia-400/15 text-fuchsia-200 border-fuchsia-300/20",
+        "Educação": "bg-emerald-400/15 text-emerald-200 border-emerald-300/20",
+        "Formação": "bg-indigo-400/15 text-indigo-200 border-indigo-300/20",
+        "Institucional": "bg-slate-400/15 text-slate-200 border-slate-300/20",
+      };
+      const cls = map[tema] || "bg-white/10 text-slate-200 border-white/10";
+      return `<span class="inline-flex items-center text-xs px-2 py-1 rounded-xl border ${cls}">${tema}</span>`;
+    };
+
+    const pill = (txt)=> `<span class="text-xs px-2 py-1 rounded-xl bg-white/10 border border-white/10 text-slate-200">${txt}</span>`;
+
+    const formatDate = (iso)=> parseDateISO(iso).toLocaleDateString("pt-BR",{day:"2-digit",month:"short",year:"numeric"});
+
+    const withinPeriod = (dateISO, period)=>{
+      if(period==="all") return true;
+      const now = new Date();
+      const d = parseDateISO(dateISO);
+      return daysBetween(now, d) <= Number(period);
+    };
+
+    // ---------- STATE ----------
+    const state = { q:"", territorio:"", tema:"", tipo:"", periodo:"all", view:"grid" };
+
+    // ---------- INIT FILTERS ----------
+    function initFilters(){
+      uniqueSorted(territorios.map(t=>t.nome)).forEach(t=>{
+        const opt = document.createElement("option"); opt.value=t; opt.textContent=t;
+        $("fTerritorio").appendChild(opt);
+      });
+      uniqueSorted(itens.map(i=>i.tema).filter(Boolean)).forEach(tm=>{
+        const opt = document.createElement("option"); opt.value=tm; opt.textContent=tm;
+        $("fTema").appendChild(opt);
+      });
+    }
+
+    function filtered(){
+      const q = state.q.trim().toLowerCase();
+      return itens.filter(i=>{
+        const matchQ = !q || [i.titulo,i.resumo,i.tema,i.territorio].some(v=>(v||"").toLowerCase().includes(q));
+        const matchTerr = !state.territorio || i.territorio===state.territorio || i.territorio==="Todos";
+        const matchTema = !state.tema || i.tema===state.tema;
+        const matchTipo = !state.tipo || i.tipo===state.tipo;
+        const matchPeriodo = withinPeriod(i.data, state.periodo);
+        return matchQ && matchTerr && matchTema && matchTipo && matchPeriodo;
+      });
+    }
+
+    // ---------- CARDS ----------
+    function card(i){
+      const img = i.img ? `
+        <div class="relative h-32 rounded-2xl overflow-hidden border border-white/10">
+          <img src="${i.img}" class="h-full w-full object-cover scale-[1.02] hover:scale-[1.08] transition duration-500" alt="">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent"></div>
+          <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+            <div class="text-xs text-slate-200">${i.subTipo || i.tipo}</div>
+            ${themeBadge(i.tema)}
+          </div>
+        </div>
+      ` : `
+        <div class="flex items-center justify-between">
+          <div class="text-xs text-slate-300">${i.subTipo || i.tipo}</div>
+          ${themeBadge(i.tema)}
+        </div>
+      `;
+
+      return `
+        <article class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow shine card-tilt transition">
+          ${img}
+          <h3 class="mt-3 font-extrabold leading-snug">${i.titulo}</h3>
+          <p class="mt-1 text-sm text-slate-200/90">${i.resumo || ""}</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            ${pill("🗺️ " + (i.territorio||"—"))}
+            ${pill("🗓️ " + formatDate(i.data))}
+            ${i.publico ? pill("👥 " + i.publico) : ""}
+          </div>
+          <div class="mt-4 flex gap-2">
+            <button class="open-item px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100 text-sm" data-id="${i.id}">
+              Abrir
+            </button>
+            <button class="copy-link px-4 py-2 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/15 text-sm" data-id="${i.id}">
+              Copiar link
+            </button>
+          </div>
+        </article>
+      `;
+    }
+
+    function row(i){
+      return `
+        <article class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow shine transition">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <div class="text-xs text-slate-300">${i.subTipo || i.tipo}</div>
+                ${themeBadge(i.tema)}
+                ${pill("🗺️ " + (i.territorio||"—"))}
+                ${pill("🗓️ " + formatDate(i.data))}
+              </div>
+              <h3 class="mt-2 font-extrabold leading-snug">${i.titulo}</h3>
+              <p class="mt-1 text-sm text-slate-200/90">${i.resumo || ""}</p>
+            </div>
+            <div class="flex flex-col gap-2 shrink-0">
+              <button class="open-item px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100 text-sm" data-id="${i.id}">Abrir</button>
+              <button class="copy-link px-4 py-2 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/15 text-sm" data-id="${i.id}">Copiar link</button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function empty(msg){
+      return `<div class="rounded-3xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">${msg}</div>`;
+    }
+
+    // ---------- RENDER ----------
+    function renderAll(){
+      const list = filtered();
+
+      const noticias = list.filter(i=>i.tipo==="Notícia").length;
+      const conteudos = list.filter(i=>i.tipo==="Conteúdo").length;
+      const eventos = list.filter(i=>i.tipo==="Evento").length;
+      const atualizacoes = list.filter(i=>["Notícia","Comunicado"].includes(i.tipo)).length;
+
+      $("kpiNoticias").textContent = noticias;
+      $("kpiConteudos2").textContent = conteudos;
+      $("kpiEventos").textContent = eventos;
+      $("kpiTerritorios2").textContent = territorios.length;
+
+      $("kpiAtualizacoes").textContent = atualizacoes;
+      $("kpiConteudos").textContent = conteudos;
+      $("kpiTerritorios").textContent = territorios.length;
+
+      // Featured
+      const featured = list.filter(i=>i.tipo==="Conteúdo" && i.destaque)
+        .sort((a,b)=>parseDateISO(b.data)-parseDateISO(a.data)).slice(0,6);
+      $("featured").innerHTML = featured.map(card).join("") || empty("Nenhum conteúdo em destaque com os filtros atuais.");
+
+      // Results (library)
+      const library = list.filter(i=>i.tipo==="Conteúdo").sort((a,b)=>parseDateISO(b.data)-parseDateISO(a.data));
+      $("countResults").textContent = library.length;
+      $("results").className = state.view==="grid"
+        ? "mt-4 grid grid-cols-1 md:grid-cols-2 gap-3"
+        : "mt-4 space-y-3";
+      $("results").innerHTML = (state.view==="grid" ? library.map(card) : library.map(row)).join("")
+        || empty("Nenhum conteúdo encontrado com os filtros atuais.");
+
+      // News
+      const news = list.filter(i=>i.tipo==="Notícia").sort((a,b)=>parseDateISO(b.data)-parseDateISO(a.data)).slice(0,6);
+      $("news").innerHTML = news.map(n=>`
+        <article class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow shine transition">
+          ${n.img ? `
+            <div class="relative h-28 rounded-2xl overflow-hidden border border-white/10">
+              <img src="${n.img}" class="h-full w-full object-cover hover:scale-[1.08] transition duration-500" alt="">
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/75 to-transparent"></div>
+              <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                <div class="text-xs text-slate-200">🗓️ ${formatDate(n.data)} • ${n.territorio}</div>
+                ${themeBadge(n.tema)}
+              </div>
+            </div>
+          ` : `
+            <div class="flex items-center justify-between">
+              <div class="text-xs text-slate-300">🗓️ ${formatDate(n.data)} • ${n.territorio}</div>
+              ${themeBadge(n.tema)}
+            </div>
+          `}
+          <h3 class="mt-3 font-extrabold leading-snug">${n.titulo}</h3>
+          <p class="mt-1 text-sm text-slate-200/90">${n.resumo || ""}</p>
+          <div class="mt-3">
+            <button class="open-item px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100 text-sm" data-id="${n.id}">
+              Ler notícia
+            </button>
+          </div>
+        </article>
+      `).join("") || empty("Nenhuma notícia com os filtros atuais.");
+
+      // Territórios
+      $("territorios").innerHTML = territorios.map(t=>`
+        <button class="w-full text-left rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow shine transition hover:bg-white/10"
+          data-territorio="${t.nome}">
+          <div class="flex items-center justify-between">
+            <div class="font-extrabold">${t.icon} ${t.nome}</div>
+            <span class="text-xs text-slate-300">${formatDate(t.updatedAt)}</span>
+          </div>
+          <div class="mt-1 text-sm text-slate-200/90">${t.status}</div>
+          <div class="mt-3 flex flex-wrap gap-2">
+            ${pill("🔎 Filtrar")}
+            ${state.territorio===t.nome ? pill("✅ Ativo") : ""}
+          </div>
+        </button>
+      `).join("");
+
+      document.querySelectorAll("[data-territorio]").forEach(btn=>{
+        btn.onclick = ()=>{
+          state.territorio = btn.dataset.territorio;
+          $("fTerritorio").value = state.territorio;
+          renderAll();
+          window.scrollTo({top:0,behavior:"smooth"});
+        };
+      });
+
+      // Eventos
+      const evs = list.filter(i=>i.tipo==="Evento").sort((a,b)=>parseDateISO(a.data)-parseDateISO(b.data)).slice(0,5);
+      $("events").innerHTML = evs.map(e=>`
+        <article class="rounded-3xl border border-white/10 bg-white/5 p-4 soft-shadow shine transition">
+          <div class="flex items-center justify-between">
+            <div class="text-xs text-slate-300">🗓️ ${formatDate(e.data)} • ${e.local || "—"}</div>
+            ${themeBadge(e.tema)}
+          </div>
+          <h3 class="mt-2 font-extrabold">${e.titulo}</h3>
+          <p class="mt-1 text-sm text-slate-200/90">${e.resumo || ""}</p>
+          <div class="mt-3">
+            <button class="open-item px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100 text-sm" data-id="${e.id}">
+              Ver detalhes
+            </button>
+          </div>
+        </article>
+      `).join("") || empty("Nenhum evento no período.");
+
+      // Hint
+      const activeFilters = [state.territorio, state.tema, state.tipo].filter(Boolean).length + (state.periodo!=="all"?1:0) + (state.q?1:0);
+      $("hint").classList.toggle("hidden", activeFilters===0);
+      if(activeFilters>0) $("hint").textContent = `✨ Filtros ativos: ${activeFilters} • Itens: ${list.length}`;
+
+      bindClicks();
+    }
+
+    // ---------- MODAL ----------
+    function openModal(item){
+      $("modalType").textContent = item.tipo + (item.subTipo ? " • " + item.subTipo : "");
+      $("modalTitle").textContent = item.titulo;
+      $("modalMeta").textContent = `${item.tema || "—"} • ${item.territorio || "—"} • ${formatDate(item.data)}`;
+      $("modalBody").textContent = item.corpo || item.resumo || "Sem descrição.";
+
+      const actions = [];
+      actions.push(`<button class="copy-link px-4 py-2 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/15 text-sm" data-id="${item.id}">Copiar link</button>`);
+      if(item.tipo==="Conteúdo") actions.unshift(`<a class="px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100 text-sm" href="${item.url||"#"}">Abrir material</a>`);
+      if(item.tipo==="Evento") actions.unshift(`<button class="px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100 text-sm" onclick="alert('Aqui entra inscrição / calendário')">Inscrever-se</button>`);
+      if(item.tipo==="Notícia") actions.unshift(`<button class="px-4 py-2 rounded-2xl bg-white text-slate-950 font-semibold hover:bg-slate-100 text-sm" onclick="alert('Aqui entra a rota /noticias/${item.id}')">Ir para página</button>`);
+
+      $("modalActions").innerHTML = actions.join("");
+      $("modal").classList.remove("hidden");
+      $("modalActions").querySelectorAll(".copy-link").forEach(b=> b.onclick = ()=> copyDeepLink(b.dataset.id));
+    }
+
+    function closeModal(){ $("modal").classList.add("hidden"); }
+
+    // ---------- DEEPLINK ----------
+    function makeDeepLink(id){
+      const url = new URL(window.location.href);
+      url.hash = `#item=${encodeURIComponent(id)}`;
+      return url.toString();
+    }
+    async function copyDeepLink(id){
+      const link = makeDeepLink(id);
+      try{
+        await navigator.clipboard.writeText(link);
+        $("hint").classList.remove("hidden");
+        $("hint").textContent = "✅ Link copiado!";
+        setTimeout(()=> $("hint").classList.add("hidden"), 1200);
+      }catch(e){
+        alert("Não foi possível copiar automaticamente. Link: " + link);
+      }
+    }
+
+    // ---------- BIND ----------
+    function bindClicks(){
+      document.querySelectorAll(".open-item").forEach(btn=>{
+        btn.onclick = ()=>{
+          const id = btn.dataset.id;
+          const item = itens.find(x=>x.id===id);
+          if(item) openModal(item);
+          history.replaceState(null,"",makeDeepLink(id));
+        };
+      });
+      document.querySelectorAll(".copy-link").forEach(btn=>{
+        btn.onclick = ()=> copyDeepLink(btn.dataset.id);
+      });
+    }
+
+    // ---------- WIRES ----------
+    function wire(){
+      // filters
+      $("q").addEventListener("input",(e)=>{ state.q=e.target.value; renderAll(); });
+      $("clearQ").onclick = ()=>{ state.q=""; $("q").value=""; renderAll(); };
+
+      $("fTerritorio").onchange = (e)=>{ state.territorio=e.target.value; renderAll(); };
+      $("fTema").onchange = (e)=>{ state.tema=e.target.value; renderAll(); };
+      $("fTipo").onchange = (e)=>{ state.tipo=e.target.value; renderAll(); };
+      $("fPeriodo").onchange = (e)=>{ state.periodo=e.target.value; renderAll(); };
+
+      $("btnReset").onclick = ()=>{
+        state.q=""; state.territorio=""; state.tema=""; state.tipo=""; state.periodo="all";
+        $("q").value="";
+        $("fTerritorio").value="";
+        $("fTema").value="";
+        $("fTipo").value="";
+        $("fPeriodo").value="all";
+        renderAll();
+      };
+
+      $("toggleView").onclick = ()=>{
+        state.view = (state.view==="grid") ? "list" : "grid";
+        renderAll();
+      };
+
+      // hero CTAs
+      $("ctaExplore").onclick = ()=> document.getElementById("conteudosSection").scrollIntoView({behavior:"smooth"});
+      $("ctaNews").onclick = ()=> document.getElementById("noticiasSection").scrollIntoView({behavior:"smooth"});
+      $("ctaTerr").onclick = ()=> document.getElementById("territoriosSection").scrollIntoView({behavior:"smooth"});
+
+      // nav
+      document.querySelectorAll("[data-nav]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const key = btn.dataset.nav;
+          const map = { conteudos:"conteudosSection", noticias:"noticiasSection", territorios:"territoriosSection" };
+          if(key==="sobre"){ alert("Aqui pode abrir /sobre ou uma seção com parceiros, missão e como participar."); return; }
+          document.getElementById(map[key]).scrollIntoView({behavior:"smooth"});
+        };
+      });
+
+      // modal
+      $("modalClose").onclick = closeModal;
+      $("modal").addEventListener("click",(e)=>{ if(e.target === $("modal").firstElementChild) closeModal(); });
+
+      // open by hash
+      const openByHash = ()=>{
+        const h = window.location.hash;
+        if(h.startsWith("#item=")){
+          const id = decodeURIComponent(h.replace("#item=",""));
+          const item = itens.find(x=>x.id===id);
+          if(item) openModal(item);
+        }
+      };
+      openByHash();
+      window.addEventListener("hashchange", openByHash);
+    }
+
+    // ---------- START ----------
+    initFilters();
+    wire();
+    renderAll();
+  </script>
+</body>
+</html>
