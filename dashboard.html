@@ -1,0 +1,2090 @@
+<!doctype html>
+<html lang="pt-BR" translate="no">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Language" content="pt-BR">
+  <meta name="google" content="notranslate">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hub Resiliência Climática • Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Chart.js (gráficos) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Luxon + adapter (datas no eixo) -->
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
+
+  <!-- PapaParse (importar CSV opcional) -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <style>
+    :root{
+      --green:#1B7F5A;
+      --green2:#4CAF8F;
+      --blue:#0D3B66;
+      --yellow:#F2C94C;
+      --bg:#F5F7F6;
+      --white:#ffffff;
+      --graphite:#232323;
+      --muted:#667085;
+      --danger:#E11D48;
+      --warn:#D97706;
+
+      --shadow: 0 24px 60px rgba(13,59,102,.14);
+      --shadow2: 0 16px 40px rgba(27,127,90,.16);
+      --radius: 18px;
+
+      --line: rgba(13,59,102,.12);
+      --ring: rgba(242,201,76,.55);
+
+      --glass: rgba(255,255,255,.72);
+      --glass2: rgba(255,255,255,.62);
+      --card: rgba(255,255,255,.78);
+      --card2: rgba(255,255,255,.70);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--graphite);
+      background:
+        radial-gradient(1200px 700px at 18% 8%, rgba(76,175,143,.24), transparent 55%),
+        radial-gradient(900px 600px at 82% 14%, rgba(13,59,102,.20), transparent 55%),
+        radial-gradient(800px 500px at 50% 90%, rgba(242,201,76,.18), transparent 55%),
+        linear-gradient(180deg, #f7fbf9 0%, var(--bg) 65%, #f3f6f5 100%);
+      overflow-x:hidden;
+    }
+
+    .bg-grid{
+      position: fixed; inset: 0;
+      pointer-events: none;
+      opacity: .75;
+      background:
+        radial-gradient(circle at 1px 1px, rgba(13,59,102,.09) 1px, transparent 0),
+        linear-gradient(transparent 0, transparent 95%, rgba(13,59,102,.05) 100%);
+      background-size: 34px 34px, 100% 100%;
+      mix-blend-mode: multiply;
+      mask-image: radial-gradient(closest-side at 50% 16%, black 0%, transparent 68%);
+      z-index: 0;
+    }
+    .noise{
+      position: fixed; inset: 0;
+      pointer-events: none;
+      opacity:.06;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+      z-index: 0;
+    }
+
+    .cursor-glow{
+      position: fixed;
+      width: 560px; height: 560px;
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(76,175,143,.22) 0%, rgba(13,59,102,.12) 28%, transparent 62%);
+      filter: blur(4px);
+      opacity: 0;
+      transition: opacity .25s ease;
+      z-index: 2;
+    }
+    @media (pointer: coarse){ .cursor-glow{ display:none !important; } }
+
+    .shell{
+      position: relative;
+      z-index: 3;
+      min-height: 100vh;
+      display:grid;
+      grid-template-columns: 300px 1fr;
+      gap: 18px;
+      padding: 18px;
+      max-width: 1480px;
+      margin: 0 auto;
+    }
+    @media (max-width: 1040px){
+      .shell{ grid-template-columns: 1fr; }
+    }
+
+    .sidebar{
+      position: sticky;
+      top: 18px;
+      align-self: start;
+      border-radius: calc(var(--radius) + 10px);
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(255,255,255,.72), rgba(255,255,255,.60));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .sidebar::before{
+      content:"";
+      position:absolute; inset:-140px;
+      background:
+        radial-gradient(circle at 25% 30%, rgba(76,175,143,.22), transparent 55%),
+        radial-gradient(circle at 80% 20%, rgba(13,59,102,.18), transparent 55%),
+        radial-gradient(circle at 60% 90%, rgba(242,201,76,.18), transparent 55%);
+      transform: rotate(-8deg);
+      opacity: .9;
+      pointer-events:none;
+    }
+    .side-inner{ position: relative; z-index: 1; padding: 16px; }
+    .brand{
+      display:flex; gap: 10px; align-items:center;
+      text-decoration:none; color:inherit;
+      padding: 10px 10px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.65);
+      border: 1px solid rgba(13,59,102,.10);
+    }
+    .mark{
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      background: conic-gradient(from 180deg, var(--green), var(--green2), var(--blue), var(--green));
+      box-shadow: 0 10px 22px rgba(27,127,90,.20);
+      position: relative; overflow:hidden;
+      flex: 0 0 auto;
+    }
+    .mark::after{
+      content:"";
+      position:absolute; inset:-22px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.55), transparent 55%);
+      transform: rotate(12deg);
+    }
+    .brand strong{
+      font-family:Poppins, Inter, sans-serif;
+      letter-spacing: -.02em;
+      font-size: 14px;
+      line-height: 1.05;
+      display:block;
+    }
+    .brand span{
+      display:block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .side-section{
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(13,59,102,.10);
+      background: rgba(255,255,255,.66);
+      box-shadow: 0 14px 34px rgba(13,59,102,.10);
+    }
+    .side-section h3{
+      margin: 0 0 10px;
+      font-family: Poppins, Inter, sans-serif;
+      letter-spacing: -.02em;
+      font-size: 13.5px;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .chip{
+      display:inline-flex; align-items:center; gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(27,127,90,.18);
+      background: rgba(27,127,90,.10);
+      color: var(--green);
+      font-weight: 900;
+      font-size: 11.5px;
+      white-space: nowrap;
+    }
+    .chip .dot{
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: var(--green2);
+      box-shadow: 0 0 0 5px rgba(76,175,143,.18);
+    }
+
+    .field{ display:grid; gap: 7px; margin-top: 10px; }
+    .label{
+      font-size: 12px;
+      color: rgba(35,35,35,.76);
+      font-weight: 800;
+      letter-spacing: -.01em;
+    }
+    .control, select, input[type="date"], input[type="text"]{
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(13,59,102,.12);
+      background: rgba(255,255,255,.78);
+      font-weight: 700;
+      font-size: 12.5px;
+      color: rgba(35,35,35,.92);
+      outline: none;
+      transition: box-shadow .2s ease, border-color .2s ease;
+    }
+    select:focus, input:focus{
+      box-shadow: 0 0 0 4px var(--ring);
+      border-color: rgba(242,201,76,.65);
+    }
+    .row2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 1040px){ .row2{ grid-template-columns: 1fr; } }
+
+    .btn{
+      border: none;
+      cursor: pointer;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 800;
+      font-size: 12.5px;
+      transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+      display:flex; align-items:center; justify-content:center;
+      gap: 10px;
+      user-select:none;
+      white-space: nowrap;
+      width: 100%;
+    }
+    .btn:focus{ outline: 3px solid var(--ring); outline-offset: 2px; }
+    .btn-primary{
+      color: #0b1e14;
+      background: linear-gradient(135deg, var(--yellow), #ffe08a);
+      box-shadow: 0 18px 34px rgba(242,201,76,.26);
+      border: 1px solid rgba(242,201,76,.45);
+    }
+    .btn-primary:hover{ transform: translateY(-1px); filter: brightness(1.02); box-shadow: 0 22px 44px rgba(242,201,76,.34); }
+    .btn-ghost{
+      background: rgba(255,255,255,.74);
+      border: 1px solid rgba(13,59,102,.12);
+      color: rgba(35,35,35,.90);
+    }
+    .btn-ghost:hover{ transform: translateY(-1px); box-shadow: 0 18px 32px rgba(13,59,102,.10); }
+
+    .hint{
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .main{
+      display:grid;
+      gap: 14px;
+      align-content:start;
+    }
+
+    .top{
+      border-radius: calc(var(--radius) + 10px);
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(255,255,255,.72), rgba(255,255,255,.60));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position: relative;
+    }
+    .top::before{
+      content:"";
+      position:absolute; inset:-180px;
+      background:
+        radial-gradient(circle at 20% 25%, rgba(13,59,102,.18), transparent 55%),
+        radial-gradient(circle at 85% 22%, rgba(76,175,143,.20), transparent 55%),
+        radial-gradient(circle at 60% 95%, rgba(242,201,76,.18), transparent 56%);
+      transform: rotate(-7deg);
+      opacity: .9;
+      pointer-events:none;
+    }
+    .top-inner{
+      position: relative;
+      z-index: 1;
+      padding: 14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .title{
+      display:grid; gap: 4px;
+      min-width: 260px;
+    }
+    .title h1{
+      margin:0;
+      font-family: Poppins, Inter, sans-serif;
+      letter-spacing: -.03em;
+      font-size: 18px;
+      line-height: 1.15;
+    }
+    .title p{
+      margin:0;
+      color: rgba(35,35,35,.78);
+      font-size: 12.5px;
+      line-height: 1.5;
+      max-width: 80ch;
+    }
+
+    .top-actions{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap: wrap;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(13,59,102,.12);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .pill .b{
+      width: 8px; height: 8px; border-radius: 999px;
+      background: var(--green2);
+      box-shadow: 0 0 0 5px rgba(76,175,143,.18);
+    }
+    .pill.warn .b{ background: var(--warn); box-shadow: 0 0 0 5px rgba(217,119,6,.18); }
+    .pill.danger .b{ background: var(--danger); box-shadow: 0 0 0 5px rgba(225,29,72,.16); }
+
+    .mini-btn{
+      border: 1px solid rgba(13,59,102,.12);
+      background: rgba(255,255,255,.74);
+      color: rgba(35,35,35,.92);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 900;
+      font-size: 12.5px;
+      cursor:pointer;
+      transition: transform .15s ease, box-shadow .2s ease;
+      display:flex; align-items:center; gap: 10px;
+      user-select:none;
+      white-space: nowrap;
+    }
+    .mini-btn:hover{ transform: translateY(-1px); box-shadow: 0 18px 32px rgba(13,59,102,.10); }
+    .mini-btn:focus{ outline: 3px solid var(--ring); outline-offset: 2px; }
+
+    .tabs{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 12px 14px 0;
+      position: relative;
+      z-index: 1;
+    }
+    .tab{
+      border: 1px solid rgba(13,59,102,.12);
+      background: rgba(255,255,255,.70);
+      color: rgba(35,35,35,.88);
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 12px;
+      cursor:pointer;
+      transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+      user-select:none;
+    }
+    .tab:hover{ transform: translateY(-1px); box-shadow: 0 14px 26px rgba(13,59,102,.10); }
+    .tab.active{
+      border-color: rgba(27,127,90,.24);
+      background: rgba(27,127,90,.10);
+      color: var(--green);
+    }
+
+    .kpis{
+      padding: 12px 14px 14px;
+      display:grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+    @media (max-width: 1360px){ .kpis{ grid-template-columns: repeat(3, 1fr);} }
+    @media (max-width: 780px){ .kpis{ grid-template-columns: 1fr; } }
+
+    .kpi{
+      background: var(--card);
+      border: 1px solid rgba(13,59,102,.10);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: 0 18px 42px rgba(13,59,102,.10);
+      transition: transform .18s ease, box-shadow .22s ease, border-color .22s ease;
+      min-height: 92px;
+      display:grid;
+      gap: 6px;
+      align-content:start;
+    }
+    .kpi:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 26px 70px rgba(13,59,102,.14);
+      border-color: rgba(27,127,90,.22);
+    }
+    .kpi .klabel{
+      color: rgba(35,35,35,.78);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: -.01em;
+    }
+    .kpi .kvalue{
+      font-family: Poppins, Inter, sans-serif;
+      letter-spacing: -.02em;
+      font-size: 22px;
+      line-height: 1.1;
+      margin:0;
+    }
+    .kpi .khint{
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      margin:0;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+    }
+    @media (max-width: 1200px){ .grid{ grid-template-columns: 1fr; } }
+
+    .panel{
+      border-radius: calc(var(--radius) + 10px);
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(255,255,255,.72), rgba(255,255,255,.60));
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      position: relative;
+    }
+    .panel::before{
+      content:"";
+      position:absolute; inset:-180px;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(76,175,143,.18), transparent 55%),
+        radial-gradient(circle at 85% 25%, rgba(13,59,102,.14), transparent 56%),
+        radial-gradient(circle at 60% 95%, rgba(242,201,76,.14), transparent 56%);
+      transform: rotate(-8deg);
+      opacity: .92;
+      pointer-events:none;
+    }
+    .panel-inner{
+      position: relative;
+      z-index: 1;
+      padding: 14px;
+      display:grid;
+      gap: 12px;
+    }
+    .panel-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .panel-head .hgroup{ display:grid; gap: 4px; }
+    .panel-head h2{
+      margin:0;
+      font-family: Poppins, Inter, sans-serif;
+      letter-spacing: -.02em;
+      font-size: 15px;
+    }
+    .panel-head p{
+      margin:0;
+      color: rgba(35,35,35,.78);
+      font-size: 12.5px;
+      line-height: 1.5;
+      max-width: 78ch;
+    }
+
+    .seg{
+      display:flex; gap: 8px; flex-wrap: wrap; align-items:center;
+    }
+    .seg button{
+      border: 1px solid rgba(13,59,102,.12);
+      background: rgba(255,255,255,.74);
+      color: rgba(35,35,35,.90);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-weight: 900;
+      font-size: 12px;
+      cursor:pointer;
+      transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+      user-select:none;
+    }
+    .seg button:hover{ transform: translateY(-1px); box-shadow: 0 14px 26px rgba(13,59,102,.10); }
+    .seg button.active{
+      border-color: rgba(27,127,90,.24);
+      background: rgba(27,127,90,.10);
+      color: var(--green);
+    }
+
+    .canvas-wrap{
+      background: rgba(255,255,255,.70);
+      border: 1px solid rgba(13,59,102,.10);
+      border-radius: var(--radius);
+      padding: 10px;
+      box-shadow: 0 18px 42px rgba(13,59,102,.10);
+      min-height: 340px;
+      display:grid;
+      place-items: center;
+    }
+    .canvas-wrap canvas{
+      width: 100% !important;
+      height: 320px !important;
+    }
+    @media (max-width: 780px){
+      .canvas-wrap{ min-height: 280px; }
+      .canvas-wrap canvas{ height: 260px !important; }
+    }
+
+    .viz-grid{
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 520px){ .viz-grid{ grid-template-columns: 1fr; } }
+    .viz-card{
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(13,59,102,.10);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: 0 16px 34px rgba(13,59,102,.10);
+      cursor:pointer;
+      user-select:none;
+      transition: transform .18s ease, box-shadow .22s ease, border-color .22s ease;
+      display:flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items:center;
+    }
+    .viz-card:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 22px 60px rgba(13,59,102,.14);
+      border-color: rgba(27,127,90,.20);
+    }
+    .viz-card.active{
+      border-color: rgba(27,127,90,.28);
+      background: rgba(27,127,90,.10);
+    }
+    .viz-card strong{
+      font-size: 13px;
+      letter-spacing: -.01em;
+    }
+    .viz-card span{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .viz-pill{
+      border: 1px solid rgba(13,59,102,.12);
+      background: rgba(255,255,255,.70);
+      border-radius: 999px;
+      padding: 6px 9px;
+      font-weight: 900;
+      font-size: 11.5px;
+      white-space: nowrap;
+      color: rgba(13,59,102,.86);
+    }
+
+    .table-wrap{
+      background: rgba(255,255,255,.70);
+      border: 1px solid rgba(13,59,102,.10);
+      border-radius: var(--radius);
+      padding: 10px;
+      box-shadow: 0 18px 42px rgba(13,59,102,.10);
+      overflow:auto;
+      max-height: 420px;
+    }
+    table{
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 820px;
+    }
+    thead th{
+      position: sticky; top: 0;
+      background: rgba(245,247,246,.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(13,59,102,.12);
+      font-size: 12px;
+      text-align:left;
+      padding: 10px 10px;
+      font-weight: 900;
+      color: rgba(13,59,102,.88);
+      white-space: nowrap;
+    }
+    tbody td{
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(13,59,102,.08);
+      font-size: 12.5px;
+      color: rgba(35,35,35,.86);
+      white-space: nowrap;
+    }
+    tbody tr:hover td{
+      background: rgba(27,127,90,.06);
+    }
+
+    .tag{
+      display:inline-flex; align-items:center; gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(13,59,102,.12);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      font-size: 11.5px;
+      color: rgba(35,35,35,.88);
+    }
+    .tag .b{
+      width: 8px; height: 8px; border-radius: 999px;
+      background: var(--green2);
+      box-shadow: 0 0 0 5px rgba(76,175,143,.16);
+    }
+    .tag.warn .b{ background: var(--warn); box-shadow: 0 0 0 5px rgba(217,119,6,.16); }
+    .tag.danger .b{ background: var(--danger); box-shadow: 0 0 0 5px rgba(225,29,72,.14); }
+
+    .foot{
+      text-align:center;
+      color: rgba(35,35,35,.70);
+      font-size: 12.5px;
+      padding: 14px;
+    }
+
+    .toast{
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 99;
+      min-width: 280px;
+      max-width: 380px;
+      border-radius: 18px;
+      border: 1px solid rgba(13,59,102,.14);
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 30px 70px rgba(13,59,102,.18);
+      padding: 12px 12px;
+      display:none;
+      gap: 10px;
+      align-items:flex-start;
+    }
+    .toast .dot{
+      width: 10px; height: 10px; border-radius: 999px;
+      background: var(--green2);
+      box-shadow: 0 0 0 6px rgba(76,175,143,.18);
+      margin-top: 4px;
+    }
+    .toast strong{
+      display:block;
+      font-family: Poppins, Inter, sans-serif;
+      letter-spacing: -.02em;
+      font-size: 13px;
+      margin:0;
+    }
+    .toast p{
+      margin:4px 0 0;
+      color: rgba(35,35,35,.78);
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+    .toast .x{
+      margin-left:auto;
+      border: 1px solid rgba(13,59,102,.12);
+      background: rgba(255,255,255,.70);
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-weight: 900;
+      cursor:pointer;
+    }
+
+    @media print{
+      .bg-grid,.noise,.cursor-glow,.sidebar,.top-actions,.tabs,.seg,.foot{ display:none !important; }
+      body{ background:#fff !important; }
+      .shell{ padding:0; grid-template-columns:1fr; }
+      .panel, .top{ box-shadow:none !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-grid"></div>
+  <div class="noise"></div>
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <div class="shell">
+    <aside class="sidebar" aria-label="Filtros e navegação">
+      <div class="side-inner">
+        <a class="brand" href="index.html" aria-label="Voltar para a Home">
+          <div class="mark" aria-hidden="true"></div>
+          <div>
+            <strong>Dashboard • Hub</strong>
+            <span>Relatórios & Indicadores</span>
+          </div>
+        </a>
+
+        <div class="side-section">
+          <h3>
+            Filtros (Slicers)
+            <span class="chip"><span class="dot"></span> Ao vivo</span>
+          </h3>
+
+          <div class="field">
+            <div class="label">Território</div>
+            <select id="fTerritorio">
+              <option value="__all__">Todos</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="label">CRGR / Unidade</div>
+            <select id="fCrgr">
+              <option value="__all__">Todos</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="label">Material</div>
+            <select id="fMaterial">
+              <option value="__all__">Todos</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="label">Canal / Origem</div>
+            <select id="fCanal">
+              <option value="__all__">Todos</option>
+            </select>
+          </div>
+
+          <div class="field row2">
+            <div>
+              <div class="label">Data início</div>
+              <input id="fIni" type="date" />
+            </div>
+            <div>
+              <div class="label">Data fim</div>
+              <input id="fFim" type="date" />
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="label">Busca rápida (registro / observação)</div>
+            <input id="fBusca" type="text" placeholder="Ex.: mutirão, enchente, rota 3..." />
+          </div>
+
+          <div class="field" style="display:grid; gap:10px;">
+            <button class="btn btn-primary" id="btnAplicar" type="button">Aplicar filtros →</button>
+            <button class="btn btn-ghost" id="btnLimpar" type="button">Limpar filtros</button>
+          </div>
+
+          <p class="hint">
+            Dica: este dashboard funciona com dados de exemplo. Você pode substituir pelo seu backend/API ou importar um CSV (opcional).
+          </p>
+        </div>
+
+        <div class="side-section">
+          <h3>Importação (opcional) <span class="chip" style="border-color: rgba(13,59,102,.14); background: rgba(255,255,255,.70); color: rgba(13,59,102,.86);"><span class="dot" style="background: var(--blue); box-shadow: 0 0 0 5px rgba(13,59,102,.16);"></span> CSV</span></h3>
+          <div class="field">
+            <div class="label">Arquivo CSV (coletas)</div>
+            <input id="csvFile" class="control" type="file" accept=".csv,text/csv" />
+          </div>
+          <button class="btn btn-ghost" id="btnModelo" type="button">Baixar modelo CSV ↘</button>
+          <p class="hint">
+            Colunas esperadas: <strong>date, territorio, crgr, material, canal, kg, rejeitoKg, viagens, registros</strong> (pode ter obs).
+          </p>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main" aria-label="Relatórios do dashboard">
+      <section class="top" aria-label="Barra superior do dashboard">
+        <div class="top-inner">
+          <div class="title">
+            <h1>Dashboard Executivo (padrão Power BI PRO)</h1>
+            <p>
+              Visão completa de <strong>coletas, triagem, materiais, produtividade, rejeitos e registros</strong>.
+              Use os filtros para analisar por território/CRGR e período.
+            </p>
+          </div>
+
+          <div class="top-actions">
+            <span class="pill" id="pillPeriodo"><span class="b"></span> Período: <span id="txtPeriodo">—</span></span>
+            <span class="pill" id="pillQualidade"><span class="b"></span> Qualidade: <span id="txtQualidade">Ok</span></span>
+            <button class="mini-btn" id="btnExportCsv" type="button">Exportar CSV ↘</button>
+            <button class="mini-btn" id="btnPrint" type="button">Imprimir / PDF ⎙</button>
+          </div>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Páginas do relatório">
+          <button class="tab active" data-page="exec" role="tab" aria-selected="true">Visão Executiva</button>
+          <button class="tab" data-page="materiais" role="tab" aria-selected="false">Materiais</button>
+          <button class="tab" data-page="territorio" role="tab" aria-selected="false">Território & CRGR</button>
+          <button class="tab" data-page="operacao" role="tab" aria-selected="false">Operação</button>
+          <button class="tab" data-page="registros" role="tab" aria-selected="false">Registros</button>
+        </div>
+
+        <div class="kpis" aria-label="Indicadores principais">
+          <div class="kpi">
+            <div class="klabel">Coleta total (kg)</div>
+            <p class="kvalue" id="k_coleta">0</p>
+            <p class="khint">Somatório no período filtrado.</p>
+          </div>
+          <div class="kpi">
+            <div class="klabel">Rejeito (kg)</div>
+            <p class="kvalue" id="k_rejeito">0</p>
+            <p class="khint">Material descartado após triagem.</p>
+          </div>
+          <div class="kpi">
+            <div class="klabel">Taxa de rejeito</div>
+            <p class="kvalue" id="k_taxaRejeito">0%</p>
+            <p class="khint">Rejeito / Coleta (no período).</p>
+          </div>
+          <div class="kpi">
+            <div class="klabel">Viagens / Rotas</div>
+            <p class="kvalue" id="k_viagens">0</p>
+            <p class="khint">Total de viagens registradas.</p>
+          </div>
+          <div class="kpi">
+            <div class="klabel">Registros</div>
+            <p class="kvalue" id="k_registros">0</p>
+            <p class="khint">Ocorrências (checklists, formulários, etc.).</p>
+          </div>
+          <div class="kpi">
+            <div class="klabel">CRGR ativos</div>
+            <p class="kvalue" id="k_crgrAtivos">0</p>
+            <p class="khint">Unidades com atividade no período.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid" aria-label="Conteúdo do relatório">
+        <div class="panel" aria-label="Gráfico principal">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div class="hgroup">
+                <h2 id="mainTitle">Evolução diária de coleta (kg)</h2>
+                <p id="mainSub">Acompanhe a tendência no tempo para identificar picos, queda de produtividade e eventos no território.</p>
+              </div>
+              <div class="seg" aria-label="Opções do gráfico principal">
+                <button class="active" data-metric="kg">Coleta (kg)</button>
+                <button data-metric="rejeitoKg">Rejeito (kg)</button>
+                <button data-metric="taxaRejeito">Taxa rejeito</button>
+                <button data-metric="viagens">Viagens</button>
+                <button data-metric="registros">Registros</button>
+              </div>
+            </div>
+
+            <div class="canvas-wrap">
+              <canvas id="mainChart" aria-label="Gráfico principal"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" aria-label="Seleção de visuais e detalhes">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div class="hgroup">
+                <h2>Seleção de visuais (cards)</h2>
+                <p>Escolha o tipo de gráfico no estilo Power BI (slicer de visual).</p>
+              </div>
+              <span class="pill" id="pillPage"><span class="b"></span> Página: <span id="txtPage">Visão Executiva</span></span>
+            </div>
+
+            <div class="viz-grid" id="vizGrid" aria-label="Cards de seleção de visual"></div>
+
+            <div class="panel-head" style="margin-top:4px;">
+              <div class="hgroup">
+                <h2>Detalhamento (tabela)</h2>
+                <p>Linhas filtradas com ordenação (clique nos cabeçalhos) e exportação.</p>
+              </div>
+              <span class="tag" id="tagQualidade"><span class="b"></span> Qualidade: <span id="txtQualTag">Ok</span></span>
+            </div>
+
+            <div class="table-wrap" aria-label="Tabela de registros">
+              <table id="tbl">
+                <thead>
+                  <tr>
+                    <th data-sort="date">Data</th>
+                    <th data-sort="territorio">Território</th>
+                    <th data-sort="crgr">CRGR</th>
+                    <th data-sort="material">Material</th>
+                    <th data-sort="canal">Canal</th>
+                    <th data-sort="kg">Coleta (kg)</th>
+                    <th data-sort="rejeitoKg">Rejeito (kg)</th>
+                    <th data-sort="viagens">Viagens</th>
+                    <th data-sort="registros">Registros</th>
+                    <th data-sort="obs">Obs</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <section class="grid" aria-label="Painéis secundários">
+        <div class="panel" aria-label="Gráfico secundário A">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div class="hgroup">
+                <h2 id="secATitle">Participação por material</h2>
+                <p id="secASub">Comparação por categoria para entender composição e priorização de ações.</p>
+              </div>
+            </div>
+            <div class="canvas-wrap">
+              <canvas id="secA"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" aria-label="Gráfico secundário B">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div class="hgroup">
+                <h2 id="secBTitle">Top CRGR por coleta (kg)</h2>
+                <p id="secBSub">Ranking para acompanhar produtividade e apoiar gestão.</p>
+              </div>
+            </div>
+            <div class="canvas-wrap">
+              <canvas id="secB"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" aria-label="Gráfico secundário C">
+          <div class="panel-inner">
+            <div class="panel-head">
+              <div class="hgroup">
+                <h2 id="secCTitle">Rejeito x Coleta (dispersão)</h2>
+                <p id="secCSub">Indica eficiência e possíveis problemas de qualidade na coleta.</p>
+              </div>
+            </div>
+            <div class="canvas-wrap">
+              <canvas id="secC"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="foot">© <span id="year"></span> • Hub Resiliência Climática • Dashboard (demo profissional) • Pronto para integrar com API/BD</div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <div class="dot" id="toastDot"></div>
+    <div>
+      <strong id="toastTitle">Atualizado</strong>
+      <p id="toastMsg">Filtros aplicados e visuais recalculados.</p>
+    </div>
+    <button class="x" id="toastX" type="button">×</button>
+  </div>
+
+  <script>
+    // ============================
+    // Util
+    // ============================
+    const $ = (s, el=document) => el.querySelector(s);
+    const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+    const fmtInt = (n) => (Number(n) || 0).toLocaleString("pt-BR");
+    const fmtKg = (n) => (Number(n) || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
+    const fmtPct = (n) => (Number(n) || 0).toLocaleString("pt-BR", { style:"percent", minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+    function startOfMonthISO(d){
+      const dt = new Date(d.getFullYear(), d.getMonth(), 1);
+      return dt.toISOString().slice(0,10);
+    }
+    function todayISO(){
+      const d = new Date();
+      const tzOff = d.getTimezoneOffset() * 60000;
+      return new Date(d.getTime() - tzOff).toISOString().slice(0,10);
+    }
+
+    // ============================
+    // Paleta + CORES POR MATERIAL (fixo)
+    // ============================
+    const COLOR = {
+      green:  "#1B7F5A",
+      green2: "#4CAF8F",
+      blue:   "#0D3B66",
+      yellow: "#F2C94C",
+      graphite:"#2E2E2E",
+      danger:"#E11D48",
+      warn:"#D97706"
+    };
+
+    // ✅ cores vivas por material
+    const MATERIAL_COLOR = {
+      "Papel": "#2D9CDB",
+      "Plástico": "#F2994A",
+      "Metal": "#9B51E0",
+      "Vidro": "#27AE60",
+      "Mistura (seco)": "#F2C94C",
+      "Orgânico (impróprio)": "#EB5757"
+    };
+    const FALLBACK_MATERIALS = ["#56CCF2","#BB6BD9","#6FCF97","#F2994A","#2F80ED","#F2C94C","#EB5757","#9B51E0"];
+
+    function hexToRgb(hex){
+      const h = hex.replace("#","").trim();
+      const full = (h.length===3) ? h.split("").map(c=>c+c).join("") : h;
+      const x = parseInt(full, 16);
+      return { r:(x>>16)&255, g:(x>>8)&255, b:x&255 };
+    }
+    function withAlpha(hex, a){
+      const rgb = hexToRgb(hex);
+      return `rgba(${rgb.r},${rgb.g},${rgb.b},${a})`;
+    }
+    function materialColor(name, idx=0){
+      const c = MATERIAL_COLOR[name];
+      if (c) return c;
+      return FALLBACK_MATERIALS[idx % FALLBACK_MATERIALS.length];
+    }
+
+    const PALETTE = [
+      COLOR.green, COLOR.blue, COLOR.yellow, COLOR.green2,
+      "#2F80ED", "#9B51E0", "#EB5757", "#27AE60",
+      "#56CCF2", "#F2994A", "#6FCF97", "#BB6BD9"
+    ];
+    function pickPalette(n){
+      const out = [];
+      for (let i=0; i<n; i++) out.push(PALETTE[i % PALETTE.length]);
+      return out;
+    }
+
+    // ============================
+    // Cursor glow
+    // ============================
+    const glow = $("#cursorGlow");
+    const motionOK = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    if (motionOK && !coarsePointer){
+      window.addEventListener("mousemove", (e) => {
+        glow.style.left = e.clientX + "px";
+        glow.style.top = e.clientY + "px";
+        glow.style.opacity = "1";
+      });
+      window.addEventListener("mouseleave", () => glow.style.opacity = "0");
+    }
+
+    // ============================
+    // Dados (DEMO) - Substitua por API/BD
+    // ============================
+    const CRGRS = [
+      { territorio: "Bom Jesus", crgr: "UT & CEA Vila Pinto" },
+      { territorio: "Farrapos", crgr: "CRGR COOADESC" },
+      { territorio: "Ilha Grande dos Marinheiros", crgr: "CRGR Cooperilhas" }
+    ];
+    const MATERIAIS = ["Papel", "Plástico", "Metal", "Vidro", "Mistura (seco)", "Orgânico (impróprio)"];
+    const CANAIS = ["Coleta seletiva", "Ponto de entrega", "Mutirão", "Rota emergencial", "Parceria"];
+
+    function genData(days=180){
+      const out = [];
+      const now = new Date();
+      for (let i=days; i>=0; i--){
+        const date = new Date(now);
+        date.setDate(now.getDate() - i);
+        const iso = date.toISOString().slice(0,10);
+
+        const eventBoost = (Math.random() < 0.06) ? (1.25 + Math.random()*0.9) : 1;
+
+        for (const item of CRGRS){
+          const base = 1200 + Math.random()*900;
+          const seasonal = 0.85 + 0.3*Math.sin((i/14));
+          const kgTotal = Math.round(base * seasonal * eventBoost);
+
+          const quality = 0.07 + Math.random()*0.12;
+          const rejeitoKg = Math.round(kgTotal * quality);
+
+          const viagens = Math.max(1, Math.round(2 + kgTotal/900 + Math.random()*2));
+          const registros = Math.max(1, Math.round(1 + Math.random()*3 + (eventBoost>1?2:0)));
+
+          const lines = 2 + Math.round(Math.random()*2);
+          let remaining = kgTotal;
+
+          for (let l=0; l<lines; l++){
+            const material = MATERIAIS[Math.floor(Math.random()*MATERIAIS.length)];
+            const canal = CANAIS[Math.floor(Math.random()*CANAIS.length)];
+            const portion = (l === lines-1) ? remaining : Math.round(remaining * (0.25 + Math.random()*0.35));
+            remaining -= portion;
+
+            out.push({
+              date: iso,
+              territorio: item.territorio,
+              crgr: item.crgr,
+              material,
+              canal,
+              kg: Math.max(0, portion),
+              rejeitoKg: Math.max(0, Math.round(portion * (0.06 + Math.random()*0.18))),
+              viagens: Math.max(0, Math.round(viagens/lines + Math.random())),
+              registros: Math.max(0, Math.round(registros/lines + Math.random())),
+              obs: (eventBoost>1 && Math.random()<0.6) ? "Pico por ação/ocorrência no território" : ""
+            });
+          }
+        }
+      }
+      return out;
+    }
+
+    let raw = genData(200);
+    let filtered = raw.slice();
+
+    // ============================
+    // Estado
+    // ============================
+    const state = {
+      page: "exec",
+      metric: "kg",
+      viz: "time",
+      sortKey: "date",
+      sortDir: "desc"
+    };
+
+    // ============================
+    // UI filtros
+    // ============================
+    function unique(arr){ return Array.from(new Set(arr)).sort((a,b)=>a.localeCompare(b)); }
+    function escapeHtml(str){
+      return String(str ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+    function fillSelect(sel, values, allLabel="Todos"){
+      const el = $(sel);
+      const current = el.value || "__all__";
+      el.innerHTML = `<option value="__all__">${allLabel}</option>` + values.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
+      el.value = values.includes(current) ? current : "__all__";
+    }
+    function refreshFilterOptions(){
+      fillSelect("#fTerritorio", unique(raw.map(r=>r.territorio)));
+      fillSelect("#fCrgr", unique(raw.map(r=>r.crgr)));
+      fillSelect("#fMaterial", unique(raw.map(r=>r.material)));
+      fillSelect("#fCanal", unique(raw.map(r=>r.canal)));
+    }
+
+    $("#fIni").value = startOfMonthISO(new Date());
+    $("#fFim").value = todayISO();
+
+    // ============================
+    // Filtro
+    // ============================
+    function applyFilters(){
+      const t = $("#fTerritorio").value;
+      const c = $("#fCrgr").value;
+      const m = $("#fMaterial").value;
+      const canal = $("#fCanal").value;
+      const ini = $("#fIni").value ? new Date($("#fIni").value+"T00:00:00") : null;
+      const fim = $("#fFim").value ? new Date($("#fFim").value+"T23:59:59") : null;
+      const q = ($("#fBusca").value || "").trim().toLowerCase();
+
+      filtered = raw.filter(r => {
+        if (t !== "__all__" && r.territorio !== t) return false;
+        if (c !== "__all__" && r.crgr !== c) return false;
+        if (m !== "__all__" && r.material !== m) return false;
+        if (canal !== "__all__" && r.canal !== canal) return false;
+
+        const d = new Date(r.date+"T12:00:00");
+        if (ini && d < ini) return false;
+        if (fim && d > fim) return false;
+
+        if (q){
+          const hay = `${r.obs||""} ${r.territorio} ${r.crgr} ${r.material} ${r.canal}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      updateQualityBadge();
+      updatePeriodText();
+      renderAll();
+      toast("Atualizado", "Filtros aplicados e visuais recalculados.", "ok");
+    }
+
+    function clearFilters(){
+      $("#fTerritorio").value = "__all__";
+      $("#fCrgr").value = "__all__";
+      $("#fMaterial").value = "__all__";
+      $("#fCanal").value = "__all__";
+      $("#fIni").value = startOfMonthISO(new Date());
+      $("#fFim").value = todayISO();
+      $("#fBusca").value = "";
+      applyFilters();
+    }
+
+    // ============================
+    // Qualidade
+    // ============================
+    function sum(arr, key){ return arr.reduce((acc, r) => acc + (Number(r[key]) || 0), 0); }
+
+    function updateQualityBadge(){
+      const totalKg = sum(filtered, "kg");
+      const totalRej = sum(filtered, "rejeitoKg");
+      const taxa = totalKg > 0 ? totalRej / totalKg : 0;
+
+      const pill = $("#pillQualidade");
+      const tag = $("#tagQualidade");
+      const txt = $("#txtQualidade");
+      const txt2 = $("#txtQualTag");
+
+      let status = "ok";
+      let label = "Ok";
+      if (taxa > 0.18) { status = "danger"; label = "Crítica"; }
+      else if (taxa > 0.12) { status = "warn"; label = "Atenção"; }
+
+      pill.classList.remove("warn","danger");
+      tag.classList.remove("warn","danger");
+      if (status !== "ok"){ pill.classList.add(status); tag.classList.add(status); }
+
+      txt.textContent = label;
+      txt2.textContent = label;
+    }
+
+    function updatePeriodText(){
+      const ini = $("#fIni").value || "—";
+      const fim = $("#fFim").value || "—";
+      $("#txtPeriodo").textContent = `${ini} → ${fim}`;
+    }
+
+    // ============================
+    // Agregações
+    // ============================
+    function aggBy(arr, key, metric){
+      const map = new Map();
+      for (const r of arr){
+        const k = r[key] ?? "—";
+        const v = Number(r[metric]) || 0;
+        map.set(k, (map.get(k) || 0) + v);
+      }
+      return map;
+    }
+
+    // ============================
+    // Charts
+    // ============================
+    const chartRef = { main: null, a: null, b: null, c: null };
+
+    const VISUALS = [
+      { id: "time",    title: "Série temporal",  desc: "Evolução no tempo", pill: "Line/Area" },
+      { id: "bar",     title: "Barras",          desc: "Comparativo",       pill: "Bar" },
+      { id: "stack",   title: "Barras empilh.",  desc: "Composição",        pill: "Stack" },
+      { id: "pie",     title: "Pizza/Rosca",     desc: "Participação",      pill: "Donut" },
+      { id: "heat",    title: "Mapa de calor",   desc: "Dia x CRGR",        pill: "Heat" },
+      { id: "scatter", title: "Dispersão",       desc: "Correlação",        pill: "Scatter" }
+    ];
+
+    function renderVizCards(){
+      const grid = $("#vizGrid");
+      grid.innerHTML = "";
+      for (const v of VISUALS){
+        const div = document.createElement("div");
+        div.className = "viz-card" + (state.viz === v.id ? " active" : "");
+        div.setAttribute("role","button");
+        div.setAttribute("tabindex","0");
+        div.innerHTML = `
+          <div>
+            <strong>${escapeHtml(v.title)}</strong><br>
+            <span>${escapeHtml(v.desc)}</span>
+          </div>
+          <div class="viz-pill">${escapeHtml(v.pill)}</div>
+        `;
+        div.addEventListener("click", () => { state.viz = v.id; renderAll(); });
+        div.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            state.viz = v.id; renderAll();
+          }
+        });
+        grid.appendChild(div);
+      }
+    }
+
+    function destroyChart(ch){ if (ch && typeof ch.destroy === "function") ch.destroy(); }
+
+    function applyChartTheme(){
+      Chart.defaults.font.family = "Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+      Chart.defaults.font.weight = 700;
+      Chart.defaults.color = "rgba(35,35,35,.78)";
+
+      Chart.defaults.plugins.legend.labels.boxWidth = 10;
+      Chart.defaults.plugins.legend.labels.boxHeight = 10;
+      Chart.defaults.plugins.legend.labels.usePointStyle = true;
+
+      Chart.defaults.plugins.tooltip.backgroundColor = "rgba(255,255,255,.94)";
+      Chart.defaults.plugins.tooltip.titleColor = "rgba(13,59,102,.92)";
+      Chart.defaults.plugins.tooltip.bodyColor = "rgba(35,35,35,.88)";
+      Chart.defaults.plugins.tooltip.borderColor = "rgba(13,59,102,.12)";
+      Chart.defaults.plugins.tooltip.borderWidth = 1;
+
+      Chart.defaults.scale.grid.color = "rgba(13,59,102,.06)";
+      Chart.defaults.scale.border.color = "rgba(13,59,102,.10)";
+      Chart.defaults.scale.ticks.color = "rgba(35,35,35,.72)";
+    }
+
+    function baseChartOptions(){
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "nearest", intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: { }
+        },
+        scales: {
+          x: { grid: { color: "rgba(13,59,102,.06)" }, ticks: { color: "rgba(35,35,35,.72)", font: { weight: 800, size: 11 } } },
+          y: { grid: { color: "rgba(13,59,102,.06)" }, ticks: { color: "rgba(35,35,35,.72)", font: { weight: 800, size: 11 } } }
+        }
+      };
+    }
+
+    function shorten(s, n){
+      s = String(s ?? "");
+      if (s.length <= n) return s;
+      return s.slice(0, Math.max(0,n-1)) + "…";
+    }
+
+    // ✅ (novo) agrega por data + material (para cores por material no gráfico principal)
+    function aggByDateMaterial(arr, metric){
+      const map = new Map(); // key: date__material -> value
+
+      if (metric !== "taxaRejeito"){
+        for (const r of arr){
+          const key = `${r.date}__${r.material}`;
+          const v = Number(r[metric]) || 0;
+          map.set(key, (map.get(key) || 0) + v);
+        }
+        return map;
+      }
+
+      // taxaRejeito = rejeito/kg por material e por dia
+      const kgMap = new Map();
+      const rjMap = new Map();
+      for (const r of arr){
+        const key = `${r.date}__${r.material}`;
+        kgMap.set(key, (kgMap.get(key) || 0) + (Number(r.kg) || 0));
+        rjMap.set(key, (rjMap.get(key) || 0) + (Number(r.rejeitoKg) || 0));
+      }
+      for (const [k, kg] of kgMap){
+        const rj = rjMap.get(k) || 0;
+        map.set(k, kg > 0 ? (rj / kg) : 0);
+      }
+      return map;
+    }
+
+    function renderMainChart(){
+      const el = $("#mainChart");
+      destroyChart(chartRef.main);
+
+      const metric = state.metric;
+
+      const titles = {
+        kg: { t: "Evolução diária de coleta (kg)", s: "Tendência no tempo para identificar picos e sazonalidade." },
+        rejeitoKg: { t: "Evolução diária de rejeito (kg)", s: "Monitoramento da qualidade da coleta e triagem." },
+        taxaRejeito: { t: "Evolução diária da taxa de rejeito", s: "Rejeito/Coleta por dia (quanto menor, melhor)." },
+        viagens: { t: "Evolução diária de viagens/rotas", s: "Visão operacional das rotas registradas." },
+        registros: { t: "Evolução diária de registros", s: "Atividades e registros operacionais no período." }
+      };
+      $("#mainTitle").textContent = titles[metric].t;
+      $("#mainSub").textContent = titles[metric].s;
+
+      const viz = state.viz;
+
+      // Heatmap e Scatter: mantém como antes (sem séries por material)
+      if (viz === "heat"){
+        const crgrs = unique(filtered.map(r=>r.crgr));
+        const dates = unique(filtered.map(r=>r.date)).sort();
+
+        const map2 = new Map();
+        for (const r of filtered){
+          const key = `${r.date}__${r.crgr}`;
+          if (metric === "taxaRejeito"){
+            const prev = map2.get(key) || { kg: 0, rj: 0 };
+            prev.kg += Number(r.kg)||0;
+            prev.rj += Number(r.rejeitoKg)||0;
+            map2.set(key, prev);
+          } else {
+            const v = Number(r[metric])||0;
+            map2.set(key, (map2.get(key)||0) + v);
+          }
+        }
+        if (metric === "taxaRejeito"){
+          for (const [k, obj] of map2){
+            map2.set(k, obj.kg>0 ? (obj.rj/obj.kg) : 0);
+          }
+        }
+
+        const vals = [];
+        for (const d of dates){
+          for (const c of crgrs){
+            vals.push(map2.get(`${d}__${c}`) || 0);
+          }
+        }
+        const vMin = Math.min(...vals);
+        const vMax = Math.max(...vals);
+
+        const cell = [];
+        for (const d of dates){
+          for (let yi=0; yi<crgrs.length; yi++){
+            const c = crgrs[yi];
+            const v = map2.get(`${d}__${c}`) || 0;
+            cell.push({ x: d, y: yi, v });
+          }
+        }
+
+        chartRef.main = new Chart(el, {
+          type: "scatter",
+          data: {
+            datasets: [{
+              data: cell,
+              pointRadius: 6,
+              pointHoverRadius: 8,
+              parsing: { xAxisKey: "x", yAxisKey: "y" },
+              pointBackgroundColor: (ctx) => {
+                const v = ctx.raw?.v ?? 0;
+                const p = (vMax === vMin) ? 0.5 : (v - vMin)/(vMax - vMin);
+                const c1 = hexToRgb(COLOR.green2);
+                const c2 = hexToRgb(COLOR.blue);
+                const mix = (a,b,t)=>Math.round(a+(b-a)*t);
+                const r = mix(c1.r, c2.r, clamp(p,0,1));
+                const g = mix(c1.g, c2.g, clamp(p,0,1));
+                const b = mix(c1.b, c2.b, clamp(p,0,1));
+                return `rgba(${r},${g},${b},.85)`;
+              },
+              pointBorderColor: withAlpha(COLOR.blue, .18),
+              pointBorderWidth: 1
+            }]
+          },
+          options: {
+            ...baseChartOptions(),
+            plugins: {
+              ...baseChartOptions().plugins,
+              tooltip: {
+                callbacks: {
+                  title: (items) => `Data: ${items[0].raw.x}`,
+                  label: (item) => {
+                    const crgr = crgrs[item.raw.y];
+                    const val = (metric === "taxaRejeito") ? fmtPct(item.raw.v) : fmtInt(item.raw.v);
+                    return `${crgr} • ${titles[metric].t}: ${val}`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { type: "time", time: { unit: "day" } },
+              y: {
+                type: "category",
+                labels: crgrs.map((c, idx)=>`#${idx+1}`),
+                ticks: {
+                  callback: (val) => crgrs[val] ? shorten(crgrs[val], 18) : val
+                }
+              }
+            }
+          }
+        });
+        return;
+      }
+
+      if (viz === "scatter"){
+        const points = [];
+        for (const r of filtered){
+          const x = Number(r.kg)||0;
+          const y = (metric === "taxaRejeito")
+            ? ((Number(r.kg)||0) > 0 ? (Number(r.rejeitoKg)||0)/(Number(r.kg)||1) : 0)
+            : (metric === "rejeitoKg" ? (Number(r.rejeitoKg)||0) : (Number(r[metric])||0));
+          points.push({ x, y, territorio: r.territorio, crgr: r.crgr, date: r.date });
+        }
+
+        chartRef.main = new Chart(el, {
+          type: "scatter",
+          data: {
+            datasets: [{
+              data: points,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              pointBackgroundColor: withAlpha(COLOR.green, .55),
+              pointBorderColor: withAlpha(COLOR.blue, .18),
+              pointBorderWidth: 1
+            }]
+          },
+          options: {
+            ...baseChartOptions(),
+            plugins: {
+              ...baseChartOptions().plugins,
+              tooltip: {
+                callbacks: {
+                  title: (items) => `${items[0].raw.crgr} • ${items[0].raw.date}`,
+                  label: (item) => {
+                    const yv = (metric === "taxaRejeito") ? fmtPct(item.raw.y) : fmtInt(item.raw.y);
+                    return `Coleta: ${fmtInt(item.raw.x)} | ${titles[metric].t}: ${yv}`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { title: { display:true, text:"Coleta (kg)", color: withAlpha(COLOR.blue, .85), font:{ weight: 900 } } },
+              y: {
+                title: { display:true, text: metric==="taxaRejeito" ? "Taxa de rejeito" : "Valor", color: withAlpha(COLOR.blue, .85), font:{ weight: 900 } },
+                ticks: { callback: (v) => metric==="taxaRejeito" ? fmtPct(v) : fmtInt(v) }
+              }
+            }
+          }
+        });
+        return;
+      }
+
+      // Pie: por material com cores fixas
+      if (viz === "pie"){
+        const mapM = aggBy(filtered, "material", metric === "taxaRejeito" ? "kg" : metric);
+        const lab = Array.from(mapM.keys());
+        const val = lab.map(k => mapM.get(k) || 0);
+        const colors = lab.map((name, i) => materialColor(name, i));
+
+        chartRef.main = new Chart(el, {
+          type: "doughnut",
+          data: {
+            labels: lab,
+            datasets: [{
+              data: val,
+              backgroundColor: colors.map(c => withAlpha(c, .78)),
+              borderColor: colors.map(c => withAlpha(c, .98)),
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins: {
+              legend: {
+                display:true,
+                position: "bottom",
+                labels: { color: "rgba(35,35,35,.78)", font: { weight: 800 } }
+              },
+              tooltip: {
+                callbacks: { label: (item) => `${item.label}: ${fmtInt(item.raw)}` }
+              }
+            }
+          }
+        });
+        return;
+      }
+
+      // Stack: por canal
+      if (viz === "stack"){
+        const dates = unique(filtered.map(r=>r.date)).sort();
+        const channels = unique(filtered.map(r=>r.canal));
+        const colors = pickPalette(channels.length);
+
+        const matrix = channels.map(ch => {
+          const mapCh = new Map();
+          for (const r of filtered){
+            if (r.canal !== ch) continue;
+            const d = r.date;
+            const val = (metric === "taxaRejeito") ? (Number(r.rejeitoKg)||0) : (Number(r[metric])||0);
+            mapCh.set(d, (mapCh.get(d)||0) + val);
+          }
+          return dates.map(d => mapCh.get(d) || 0);
+        });
+
+        chartRef.main = new Chart(el, {
+          type: "bar",
+          data: {
+            labels: dates,
+            datasets: channels.map((ch, i) => ({
+              label: ch,
+              data: matrix[i],
+              backgroundColor: withAlpha(colors[i], .55),
+              borderColor: withAlpha(colors[i], .95),
+              borderWidth: 1
+            }))
+          },
+          options: {
+            ...baseChartOptions(),
+            plugins: {
+              ...baseChartOptions().plugins,
+              legend: {
+                display:true,
+                position:"bottom",
+                labels: { color:"rgba(35,35,35,.78)", font:{ weight: 800 } }
+              }
+            },
+            scales: {
+              x: { stacked: true, type:"time", time:{ unit:"day" } },
+              y: { stacked: true }
+            }
+          }
+        });
+        return;
+      }
+
+      // Bar: ranking CRGR
+      if (viz === "bar"){
+        const by = aggBy(filtered, "crgr", metric === "taxaRejeito" ? "kg" : metric);
+        const entries = Array.from(by.entries()).sort((a,b)=>b[1]-a[1]).slice(0, 10);
+        const labels3 = entries.map(e => e[0]);
+        const values3 = entries.map(e => e[1]);
+
+        chartRef.main = new Chart(el, {
+          type: "bar",
+          data: {
+            labels: labels3.map(x => shorten(x, 18)),
+            datasets: [{
+              data: values3,
+              backgroundColor: withAlpha(COLOR.blue, .18),
+              borderColor: withAlpha(COLOR.blue, .85),
+              borderWidth: 2,
+              hoverBackgroundColor: withAlpha(COLOR.green, .24),
+              hoverBorderColor: withAlpha(COLOR.green, .95)
+            }]
+          },
+          options: {
+            ...baseChartOptions(),
+            plugins: {
+              ...baseChartOptions().plugins,
+              tooltip: {
+                callbacks: {
+                  title: (items) => labels3[items[0].dataIndex],
+                  label: (item) => `${titles[metric].t}: ${metric==="taxaRejeito" ? fmtPct(item.raw) : fmtInt(item.raw)}`
+                }
+              }
+            },
+            scales: {
+              y: { ticks: { callback: (v) => metric==="taxaRejeito" ? fmtPct(v) : fmtInt(v) } }
+            }
+          }
+        });
+        return;
+      }
+
+      // ✅ DEFAULT: time (SÉRIE TEMPORAL POR MATERIAL COM CORES FIXAS)
+      const datesAll = unique(filtered.map(r => r.date)).sort();
+      const materials = unique(filtered.map(r => r.material));
+      const dm = aggByDateMaterial(filtered, metric);
+
+      const datasets = materials.map((mat, i) => {
+        const color = materialColor(mat, i);
+        const data = datesAll.map(d => ({
+          x: d,
+          y: dm.get(`${d}__${mat}`) || 0
+        }));
+        return {
+          label: mat,
+          data,
+          parsing: false,
+          borderColor: withAlpha(color, .95),
+          backgroundColor: withAlpha(color, .20),
+          fill: true,
+          tension: 0.25,
+          pointRadius: 0,
+          pointHoverRadius: 3,
+          borderWidth: 2,
+          stack: "materials"
+        };
+      });
+
+      chartRef.main = new Chart(el, {
+        type: "line",
+        data: { datasets },
+        options: {
+          ...baseChartOptions(),
+          plugins: {
+            ...baseChartOptions().plugins,
+            legend: {
+              display: true,
+              position: "bottom",
+              labels: { color: "rgba(35,35,35,.78)", font: { weight: 800 } }
+            },
+            tooltip: {
+              callbacks: {
+                label: (item) => {
+                  const y = item.raw?.y ?? item.parsed?.y ?? 0;
+                  const val = (metric === "taxaRejeito") ? fmtPct(y) : fmtInt(y);
+                  return `${item.dataset.label}: ${val}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: { type: "time", time: { unit: "day" } },
+            y: {
+              stacked: true,
+              ticks: { callback: (v) => metric==="taxaRejeito" ? fmtPct(v) : fmtInt(v) }
+            }
+          }
+        }
+      });
+    }
+
+    function renderSecondaryCharts(){
+      destroyChart(chartRef.a);
+      destroyChart(chartRef.b);
+      destroyChart(chartRef.c);
+
+      // A: donut por material (cores fixas)
+      const mapMat = aggBy(filtered, "material", "kg");
+      const mats = Array.from(mapMat.entries()).sort((a,b)=>b[1]-a[1]);
+      const labelsA = mats.map(x => x[0]);
+      const valuesA = mats.map(x => x[1]);
+      const colorsA = labelsA.map((name, i) => materialColor(name, i));
+
+      chartRef.a = new Chart($("#secA"), {
+        type: "doughnut",
+        data: {
+          labels: labelsA,
+          datasets: [{
+            data: valuesA,
+            backgroundColor: colorsA.map(c => withAlpha(c, .78)),
+            borderColor: colorsA.map(c => withAlpha(c, .98)),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins: {
+            legend: { display:true, position:"bottom", labels:{ color:"rgba(35,35,35,.78)", font:{ weight: 800 } } },
+            tooltip: { callbacks: { label: (i)=> `${i.label}: ${fmtInt(i.raw)} kg` } }
+          }
+        }
+      });
+
+      // B: top CRGR
+      const byCrgr = aggBy(filtered, "crgr", "kg");
+      const entries = Array.from(byCrgr.entries()).sort((a,b)=>b[1]-a[1]).slice(0, 10);
+      const labelsB = entries.map(e => e[0]);
+      const valuesB = entries.map(e => e[1]);
+
+      chartRef.b = new Chart($("#secB"), {
+        type: "bar",
+        data: {
+          labels: labelsB.map(x => shorten(x, 20)),
+          datasets: [{
+            data: valuesB,
+            backgroundColor: withAlpha(COLOR.green2, .35),
+            borderColor: withAlpha(COLOR.green, .95),
+            borderWidth: 2,
+            hoverBackgroundColor: withAlpha(COLOR.yellow, .45),
+            hoverBorderColor: withAlpha(COLOR.yellow, .95)
+          }]
+        },
+        options: {
+          ...baseChartOptions(),
+          indexAxis: "y",
+          plugins: {
+            ...baseChartOptions().plugins,
+            tooltip: {
+              callbacks: {
+                title: (items)=> labelsB[items[0].dataIndex],
+                label: (i)=> `Coleta (kg): ${fmtInt(i.raw)}`
+              }
+            }
+          }
+        }
+      });
+
+      // C: scatter rejeito x coleta
+      const pts = [];
+      const acc = new Map();
+      for (const r of filtered){
+        const k = r.crgr;
+        const prev = acc.get(k) || { kg: 0, rj: 0 };
+        prev.kg += Number(r.kg)||0;
+        prev.rj += Number(r.rejeitoKg)||0;
+        acc.set(k, prev);
+      }
+      for (const [crgr, v] of acc){
+        pts.push({ x: v.kg, y: v.rj, crgr });
+      }
+
+      chartRef.c = new Chart($("#secC"), {
+        type: "scatter",
+        data: {
+          datasets: [{
+            data: pts,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            pointBackgroundColor: withAlpha(COLOR.blue, .55),
+            pointBorderColor: withAlpha(COLOR.blue, .95),
+            pointBorderWidth: 1
+          }]
+        },
+        options: {
+          ...baseChartOptions(),
+          plugins: {
+            ...baseChartOptions().plugins,
+            tooltip: {
+              callbacks: {
+                title: (items)=> items[0].raw.crgr,
+                label: (i)=> `Coleta: ${fmtInt(i.raw.x)} kg • Rejeito: ${fmtInt(i.raw.y)} kg`
+              }
+            }
+          },
+          scales: {
+            x: { title:{ display:true, text:"Coleta (kg)", color: withAlpha(COLOR.blue, .85), font:{ weight: 900 } } },
+            y: { title:{ display:true, text:"Rejeito (kg)", color: withAlpha(COLOR.blue, .85), font:{ weight: 900 } } }
+          }
+        }
+      });
+    }
+
+    // ============================
+    // Table
+    // ============================
+    function renderTable(){
+      const tbody = $("#tbl tbody");
+      tbody.innerHTML = "";
+
+      const rows = filtered.slice().sort((a,b) => {
+        const k = state.sortKey;
+        const dir = state.sortDir === "asc" ? 1 : -1;
+
+        const va = a[k], vb = b[k];
+        if (k === "date") return (new Date(va) - new Date(vb)) * dir;
+        if (typeof va === "number" || typeof vb === "number") return ((Number(va)||0) - (Number(vb)||0)) * dir;
+        return String(va||"").localeCompare(String(vb||""), "pt-BR") * dir;
+      });
+
+      const show = rows.slice(0, 250);
+      for (const r of show){
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(r.date)}</td>
+          <td>${escapeHtml(r.territorio)}</td>
+          <td>${escapeHtml(r.crgr)}</td>
+          <td>${escapeHtml(r.material)}</td>
+          <td>${escapeHtml(r.canal)}</td>
+          <td>${fmtInt(r.kg)}</td>
+          <td>${fmtInt(r.rejeitoKg)}</td>
+          <td>${fmtInt(r.viagens)}</td>
+          <td>${fmtInt(r.registros)}</td>
+          <td title="${escapeHtml(r.obs || "")}">${escapeHtml((r.obs || "").length>30 ? (r.obs||"").slice(0,29)+"…" : (r.obs||""))}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function wireTableSort(){
+      $$("#tbl thead th").forEach(th => {
+        th.style.cursor = "pointer";
+        th.addEventListener("click", () => {
+          const k = th.getAttribute("data-sort");
+          if (!k) return;
+          if (state.sortKey === k){
+            state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+          } else {
+            state.sortKey = k;
+            state.sortDir = "desc";
+          }
+          renderTable();
+        });
+      });
+    }
+
+    // ============================
+    // KPIs
+    // ============================
+    function renderKpis(){
+      const totalKg = sum(filtered, "kg");
+      const totalRej = sum(filtered, "rejeitoKg");
+      const taxa = totalKg > 0 ? totalRej/totalKg : 0;
+      const viagens = sum(filtered, "viagens");
+      const registros = sum(filtered, "registros");
+      const crgrAtivos = unique(filtered.map(r=>r.crgr)).length;
+
+      $("#k_coleta").textContent = fmtKg(totalKg);
+      $("#k_rejeito").textContent = fmtKg(totalRej);
+      $("#k_taxaRejeito").textContent = fmtPct(taxa);
+      $("#k_viagens").textContent = fmtInt(viagens);
+      $("#k_registros").textContent = fmtInt(registros);
+      $("#k_crgrAtivos").textContent = fmtInt(crgrAtivos);
+    }
+
+    // ============================
+    // Pages
+    // ============================
+    function setPage(page){
+      state.page = page;
+
+      const pages = {
+        exec: { name: "Visão Executiva" },
+        materiais: { name: "Materiais" },
+        territorio: { name: "Território & CRGR" },
+        operacao: { name: "Operação" },
+        registros: { name: "Registros" }
+      };
+
+      const cfg = pages[page] || pages.exec;
+      $("#txtPage").textContent = cfg.name;
+
+      if (page === "materiais") state.viz = "pie";
+      if (page === "territorio") state.viz = "bar";
+      if (page === "operacao") state.viz = "stack";
+      if (page === "registros") state.viz = "time";
+      if (page === "exec") state.viz = state.viz || "time";
+
+      if (page === "operacao") state.metric = "viagens";
+      if (page === "registros") state.metric = "registros";
+      if (page === "exec" || page === "materiais" || page === "territorio") state.metric = "kg";
+
+      $$(".seg button").forEach(b => b.classList.toggle("active", b.dataset.metric === state.metric));
+      renderAll();
+      toast("Página alterada", `Agora você está em "${cfg.name}".`, "ok");
+    }
+
+    function wireTabs(){
+      $$(".tab").forEach(t => {
+        t.addEventListener("click", () => {
+          $$(".tab").forEach(x => { x.classList.remove("active"); x.setAttribute("aria-selected","false"); });
+          t.classList.add("active");
+          t.setAttribute("aria-selected","true");
+          setPage(t.dataset.page);
+        });
+      });
+    }
+
+    function wireMetricSeg(){
+      $$(".seg button").forEach(b => {
+        b.addEventListener("click", () => {
+          $$(".seg button").forEach(x => x.classList.remove("active"));
+          b.classList.add("active");
+          state.metric = b.dataset.metric;
+          renderAll();
+        });
+      });
+    }
+
+    // ============================
+    // Export / Print
+    // ============================
+    function csvCell(v){
+      const s = String(v ?? "");
+      if (/[,"\n]/.test(s)) return `"${s.replace(/"/g,'""')}"`;
+      return s;
+    }
+    function exportFilteredCSV(){
+      const cols = ["date","territorio","crgr","material","canal","kg","rejeitoKg","viagens","registros","obs"];
+      const lines = [cols.join(",")];
+      for (const r of filtered){
+        const row = cols.map(c => csvCell(r[c]));
+        lines.push(row.join(","));
+      }
+      const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `dashboard_filtrado_${todayISO()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      toast("Exportado", "CSV gerado com as linhas filtradas.", "ok");
+    }
+
+    function downloadModelCSV(){
+      const header = "date,territorio,crgr,material,canal,kg,rejeitoKg,viagens,registros,obs\n";
+      const sample =
+        "2026-02-01,Bom Jesus,UT & CEA Vila Pinto,Papel,Coleta seletiva,1200,120,3,2,Exemplo\n" +
+        "2026-02-01,Farrapos,CRGR COOADESC,Plástico,Mutirão,980,140,3,3,Exemplo\n";
+      const blob = new Blob([header + sample], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "modelo_coletas.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      toast("Modelo baixado", "Use este arquivo como base para importar seus dados.", "ok");
+    }
+
+    // ============================
+    // Import CSV
+    // ============================
+    function handleCSV(file){
+      if (!file) return;
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (res) => {
+          const rows = (res.data || []).map(r => ({
+            date: String(r.date || "").slice(0,10),
+            territorio: r.territorio || "—",
+            crgr: r.crgr || "—",
+            material: r.material || "—",
+            canal: r.canal || "—",
+            kg: Number(r.kg) || 0,
+            rejeitoKg: Number(r.rejeitoKg) || 0,
+            viagens: Number(r.viagens) || 0,
+            registros: Number(r.registros) || 0,
+            obs: r.obs || ""
+          })).filter(r => r.date && !Number.isNaN(new Date(r.date).getTime()));
+
+          if (!rows.length){
+            toast("Falha na importação", "Não encontrei linhas válidas no CSV.", "warn");
+            return;
+          }
+
+          raw = rows;
+          refreshFilterOptions();
+
+          const dates = unique(raw.map(r=>r.date)).sort();
+          $("#fIni").value = dates[0];
+          $("#fFim").value = dates[dates.length-1];
+
+          applyFilters();
+          toast("Importado", `CSV carregado com ${rows.length} linhas.`, "ok");
+        },
+        error: () => toast("Erro", "Não foi possível ler o CSV.", "danger")
+      });
+    }
+
+    // ============================
+    // Render geral
+    // ============================
+    function renderAll(){
+      renderVizCards();
+      renderKpis();
+      renderMainChart();
+      renderSecondaryCharts();
+      renderTable();
+      updateQualityBadge();
+      updatePeriodText();
+    }
+
+    // ============================
+    // Toast
+    // ============================
+    let toastTimer = null;
+    function toast(title, msg, kind="ok"){
+      const el = $("#toast");
+      const dot = $("#toastDot");
+      $("#toastTitle").textContent = title;
+      $("#toastMsg").textContent = msg;
+
+      dot.style.background = (kind==="danger") ? COLOR.danger : (kind==="warn" ? COLOR.warn : COLOR.green2);
+      dot.style.boxShadow = (kind==="danger")
+        ? "0 0 0 6px rgba(225,29,72,.14)"
+        : (kind==="warn" ? "0 0 0 6px rgba(217,119,6,.16)" : "0 0 0 6px rgba(76,175,143,.18)");
+
+      el.style.display = "flex";
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.style.display = "none", 3200);
+    }
+    $("#toastX").addEventListener("click", ()=> $("#toast").style.display="none");
+
+    // ============================
+    // Wire events
+    // ============================
+    $("#btnAplicar").addEventListener("click", applyFilters);
+    $("#btnLimpar").addEventListener("click", clearFilters);
+    $("#btnExportCsv").addEventListener("click", exportFilteredCSV);
+    $("#btnPrint").addEventListener("click", () => window.print());
+    $("#btnModelo").addEventListener("click", downloadModelCSV);
+
+    $("#csvFile").addEventListener("change", (e) => handleCSV(e.target.files?.[0]));
+    $("#fBusca").addEventListener("keydown", (e) => { if (e.key === "Enter") applyFilters(); });
+
+    // ============================
+    // Init
+    // ============================
+    $("#year").textContent = new Date().getFullYear();
+
+    applyChartTheme();
+    refreshFilterOptions();
+    wireTabs();
+    wireMetricSeg();
+    wireTableSort();
+    applyFilters();
+    setPage("exec");
+  </script>
+</body>
+</html>

@@ -13,7 +13,1789 @@
       tailwind.config = {
         theme: {
           extend: {
-            colors: {
+            colors: {<!doctype html>
+<html lang="pt-BR" translate="no">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Language" content="pt-BR">
+  <meta name="google" content="notranslate">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hub Resiliência Climática • Home</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --green:#1B7F5A;
+      --green2:#4CAF8F;
+      --blue:#0D3B66;
+      --yellow:#F2C94C;
+      --bg:#F5F7F6;
+      --white:#ffffff;
+      --graphite:#232323;
+      --muted:#667085;
+      --danger:#E11D48;
+      --warn:#D97706;
+      --shadow: 0 24px 60px rgba(13,59,102,.14);
+      --shadow2: 0 16px 40px rgba(27,127,90,.16);
+      --radius: 20px;
+    }
+
+    *{ box-sizing: border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--graphite);
+      background: radial-gradient(1200px 700px at 18% 8%, rgba(76,175,143,.24), transparent 55%),
+                  radial-gradient(900px 600px at 82% 14%, rgba(13,59,102,.20), transparent 55%),
+                  radial-gradient(800px 500px at 50% 90%, rgba(242,201,76,.18), transparent 55%),
+                  linear-gradient(180deg, #f7fbf9 0%, var(--bg) 65%, #f3f6f5 100%);
+      overflow-x:hidden;
+    }
+
+    /* Subtle grid + noise */
+    .bg-grid{
+      position: fixed; inset: 0;
+      pointer-events: none;
+      opacity: .75;
+      background:
+        radial-gradient(circle at 1px 1px, rgba(13,59,102,.09) 1px, transparent 0),
+        linear-gradient(transparent 0, transparent 95%, rgba(13,59,102,.05) 100%);
+      background-size: 34px 34px, 100% 100%;
+      mix-blend-mode: multiply;
+      mask-image: radial-gradient(closest-side at 50% 18%, black 0%, transparent 66%);
+      z-index: 0;
+    }
+    .noise{
+      position: fixed; inset: 0;
+      pointer-events: none;
+      opacity:.06;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+      z-index: 0;
+    }
+
+    /* Cursor glow */
+    .cursor-glow{
+      position: fixed;
+      width: 560px; height: 560px;
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(76,175,143,.22) 0%, rgba(13,59,102,.12) 28%, transparent 62%);
+      filter: blur(4px);
+      opacity: 0;
+      transition: opacity .25s ease;
+      z-index: 2;
+    }
+
+    /* Topbar */
+    .topbar{
+      position: sticky; top: 0;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+      background: rgba(245,247,246,.78);
+      border-bottom: 1px solid rgba(13,59,102,.10);
+    }
+    .topbar .inner{
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 14px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      text-decoration:none; color:inherit;
+      min-width: 230px;
+    }
+    .mark{
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      background: conic-gradient(from 180deg, var(--green), var(--green2), var(--blue), var(--green));
+      box-shadow: 0 10px 22px rgba(27,127,90,.20);
+      position: relative; overflow:hidden;
+    }
+    .mark::after{
+      content:"";
+      position:absolute; inset:-22px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.55), transparent 55%);
+      transform: rotate(12deg);
+    }
+    .brand strong{
+      font-family:Poppins, Inter, sans-serif;
+      letter-spacing: -.02em;
+      font-size: 14px;
+      line-height: 1.05;
+      display:block;
+    }
+    .brand span{
+      display:block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    nav{ display:flex; align-items:center; gap: 14px; flex-wrap: wrap; justify-content: center; }
+    .navlink{
+      text-decoration:none;
+      color: rgba(35,35,35,.88);
+      font-weight: 600;
+      font-size: 13px;
+      padding: 9px 10px;
+      border-radius: 12px;
+      transition: transform .15s ease, background .2s ease, color .2s ease;
+      position: relative;
+    }
+    .navlink::after{
+      content:"";
+      position:absolute; left: 12px; right: 12px; bottom: 6px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(27,127,90,.70), transparent);
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform .25s ease;
+      opacity:.9;
+    }
+    .navlink:hover{
+      background: rgba(27,127,90,.08);
+      color: var(--green);
+      transform: translateY(-1px);
+    }
+    .navlink:hover::after{ transform: scaleX(1); }
+
+    .actions{
+      display:flex; align-items:center; gap: 10px;
+      min-width: 230px;
+      justify-content: flex-end;
+    }
+    .btn{
+      border: none;
+      cursor: pointer;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 700;
+      font-size: 13px;
+      transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+      display:flex; align-items:center; gap: 10px;
+      user-select:none;
+      white-space: nowrap;
+    }
+    .btn-primary{
+      color: #0b1e14;
+      background: linear-gradient(135deg, var(--yellow), #ffe08a);
+      box-shadow: 0 18px 34px rgba(242,201,76,.26);
+      border: 1px solid rgba(242,201,76,.45);
+    }
+    .btn-primary:hover{ transform: translateY(-1px); filter: brightness(1.02); box-shadow: 0 22px 44px rgba(242,201,76,.34); }
+    .btn-ghost{
+      background: rgba(255,255,255,.70);
+      border: 1px solid rgba(13,59,102,.12);
+      color: rgba(35,35,35,.88);
+    }
+    .btn-ghost:hover{ transform: translateY(-1px); box-shadow: 0 18px 32px rgba(13,59,102,.10); }
+
+    .container{
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px 18px 90px;
+      position: relative;
+      z-index: 3;
+    }
+
+    /* HERO */
+    .hero{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 26px;
+      align-items: stretch;
+      padding: 34px 0 18px;
+    }
+    @media (max-width: 980px){ .hero{ grid-template-columns: 1fr; } }
+
+    .hero-card{
+      background: rgba(255,255,255,.62);
+      border: 1px solid rgba(13,59,102,.10);
+      border-radius: calc(var(--radius) + 8px);
+      padding: 26px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow:hidden;
+      height: 100%;
+    }
+    .hero-card::before{
+      content:"";
+      position:absolute; inset:-80px;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(76,175,143,.25), transparent 55%),
+        radial-gradient(circle at 85% 25%, rgba(13,59,102,.20), transparent 55%),
+        radial-gradient(circle at 55% 95%, rgba(242,201,76,.22), transparent 55%);
+      transform: rotate(-8deg);
+      opacity: .75;
+      pointer-events:none;
+    }
+    .kicker{
+      display:inline-flex; gap: 10px; align-items:center;
+      padding: 8px 12px; border-radius: 999px;
+      background: rgba(27,127,90,.10);
+      border: 1px solid rgba(27,127,90,.18);
+      color: var(--green);
+      font-weight: 800;
+      font-size: 12px;
+      position: relative; z-index: 1;
+    }
+    .kicker .dot{
+      width: 8px; height: 8px; border-radius: 999px;
+      background: var(--green2);
+      box-shadow: 0 0 0 5px rgba(76,175,143,.22);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%,100%{ transform: scale(1); opacity: 1; }
+      50%{ transform: scale(1.25); opacity: .75; }
+    }
+
+    h1{
+      font-family: Poppins, Inter, sans-serif;
+      letter-spacing: -.03em;
+      font-size: 44px;
+      line-height: 1.05;
+      margin: 14px 0 10px;
+      position: relative; z-index: 1;
+    }
+    @media (max-width: 600px){ h1{ font-size: 36px; } }
+
+    .lead{
+      position: relative; z-index: 1;
+      color: rgba(35,35,35,.86);
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 60ch;
+      margin: 0 0 16px;
+    }
+    .hero-cta{
+      position: relative; z-index: 1;
+      display:flex; gap: 10px; flex-wrap: wrap; align-items:center;
+      margin-top: 6px;
+    }
+
+    .quick-metrics{
+      margin-top: 18px;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      position: relative; z-index: 1;
+    }
+    @media (max-width: 560px){ .quick-metrics{ grid-template-columns: 1fr; } }
+    .metric{
+      background: rgba(255,255,255,.76);
+      border: 1px solid rgba(13,59,102,.10);
+      border-radius: 18px;
+      padding: 12px 12px;
+      box-shadow: 0 10px 22px rgba(13,59,102,.08);
+      transition: transform .15s ease, box-shadow .2s ease;
+    }
+    .metric:hover{ transform: translateY(-2px); box-shadow: 0 18px 34px rgba(13,59,102,.12); }
+    .metric strong{
+      font-family: Poppins, Inter, sans-serif;
+      letter-spacing: -.02em;
+      font-size: 18px;
+      display:block;
+    }
+    .metric span{ color: var(--muted); font-size: 12px; }
+
+    /* Logo */
+    .logo-hero{
+      background: rgba(255,255,255,.62);
+      border: 1px solid rgba(13,59,102,.10);
+      border-radius: calc(var(--radius) + 8px);
+      box-shadow: var(--shadow2);
+      position: relative;
+      overflow:hidden;
+      height: 100%;
+      min-height: 520px;
+      display:grid;
+      place-items:center;
+      isolation: isolate;
+      padding: 8px;
+    }
+    @media (max-width: 980px){ .logo-hero{ min-height: 420px; } }
+    .logo-hero::before{
+      content:"";
+      position:absolute; inset:-140px;
+      background:
+        radial-gradient(circle at 25% 30%, rgba(76,175,143,.28), transparent 55%),
+        radial-gradient(circle at 80% 20%, rgba(13,59,102,.24), transparent 55%),
+        radial-gradient(circle at 60% 90%, rgba(242,201,76,.26), transparent 55%);
+      transform: rotate(-8deg);
+      opacity: .92;
+      z-index: 0;
+      pointer-events:none;
+    }
+    .logo-container{
+      position: relative;
+      z-index: 1;
+      display:grid;
+      place-items:center;
+      width: 100%;
+      height: 100%;
+      padding: 6px;
+    }
+    .logo-img{
+      width: min(520px, 92%);
+      max-width: 560px;
+      height: auto;
+      filter: drop-shadow(0 34px 70px rgba(13,59,102,.24));
+    }
+
+    section{ padding: 22px 0; }
+
+    /* Reveal helpers */
+    .in{ transform: translateY(0) !important; opacity: 1 !important; }
+    [data-reveal]{ transform: translateY(10px); opacity: 0; transition: transform .55s ease, opacity .55s ease; }
+    @media (prefers-reduced-motion: reduce){
+      *{ animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+      .cursor-glow{ display:none; }
+      [data-reveal]{ transform:none; opacity: 1; }
+    }
+
+    /* =======================
+       Seção 2: Para quem é
+       ======================= */
+    .audience{
+      margin-top: 8px;
+      border-radius: calc(var(--radius) + 12px);
+      border: 1px solid rgba(13,59,102,.10);
+      background: linear-gradient(135deg, rgba(255,255,255,.66), rgba(255,255,255,.52));
+      box-shadow: 0 22px 56px rgba(13,59,102,.12);
+      padding: 18px;
+      position: relative;
+      overflow:hidden;
+    }
+    .audience::before{
+      content:"";
+      position:absolute; inset:-140px;
+      background:
+        radial-gradient(circle at 18% 35%, rgba(76,175,143,.22), transparent 55%),
+        radial-gradient(circle at 82% 25%, rgba(242,201,76,.20), transparent 56%),
+        radial-gradient(circle at 55% 95%, rgba(13,59,102,.15), transparent 56%);
+      transform: rotate(-8deg);
+      opacity: .85;
+      pointer-events:none;
+    }
+    .audience-grid{ position: relative; z-index: 1; display:grid; gap: 14px; }
+    .audience-top{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+      align-items: start;
+    }
+    @media (max-width: 900px){ .audience-top{ grid-template-columns: 1fr; } }
+    .audience-kicker{
+      display:inline-flex; align-items:center; gap: 10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(27,127,90,.18);
+      background: rgba(27,127,90,.10);
+      color: var(--green);
+      font-weight: 800;
+      font-size: 12px;
+      width: fit-content;
+      margin-bottom: 10px;
+    }
+    .audience-kicker svg{ width: 16px; height: 16px; }
+    .audience-title{
+      font-family: Poppins, Inter, sans-serif;
+      letter-spacing: -.02em;
+      font-size: 26px;
+      margin: 0 0 8px;
+    }
+    .audience-desc{
+      margin: 0;
+      color: rgba(35,35,35,.80);
+      font-size: 13.5px;
+      line-height: 1.6;
+      max-width: 72ch;
+    }
+    .audience-side{
+      background: rgba(255,255,255,.62);
+      border: 1px solid rgba(13,59,102,.10);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 16px 38px rgba(13,59,102,.10);
+    }
+    .audience-side strong{
+      display:block;
+      font-family: Poppins, Inter, sans-serif;
+      letter-spacing: -.02em;
+      margin-bottom: 6px;
+    }
+    .audience-side ul{
+      margin: 0;
+      padding-left: 18px;
+      color: rgba(35,35,35,.78);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .audience-cards{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 980px){ .audience-cards{ grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px){ .audience-cards{ grid-template-columns: 1fr; } }
+    .aud-card{
+      background: rgba(255,255,255,.70);
+      border: 1px solid rgba(13,59,102,.10);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: 0 18px 42px rgba(13,59,102,.10);
+      transition: transform .18s ease, box-shadow .22s ease, border-color .22s ease;
+    }
+    .aud-card:hover{
+      transform: translateY(-3px);
+      box-shadow: 0 26px 70px rgba(13,59,102,.14);
+      border-color: rgba(27,127,90,.22);
+    }
+    .aud-icon{
+      width: 44px; height: 44px;
+      border-radius: 16px;
+      display:grid; place-items:center;
+      background: rgba(27,127,90,.10);
+      border: 1px solid rgba(27,127,90,.18);
+      margin-bottom: 10px;
+    }
+    .aud-icon svg{ width: 22px; height: 22px; color: var(--green); }
+    .aud-card h3{ margin: 0 0 6px; font-size: 14px; letter-spacing: -.01em; }
+    .aud-card p{ margin: 0; color: rgba(35,35,35,.78); font-size: 13px; line-height: 1.55; }
+
+    /* =======================
+       Seção 3: CRGR
+       ======================= */
+    .crgr{
+      margin-top: 8px;
+      border-radius: calc(var(--radius) + 12px);
+      border: 1px solid rgba(13,59,102,.10);
+      background: linear-gradient(135deg, rgba(255,255,255,.66), rgba(255,255,255,.52));
+      box-shadow: 0 22px 56px rgba(13,59,102,.12);
+      padding: 18px;
+      position: relative;
+      overflow:hidden;
+    }
+    .crgr::before{
+      content:"";
+      position:absolute; inset:-160px;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(76,175,143,.22), transparent 55%),
+        radial-gradient(circle at 85% 25%, rgba(13,59,102,.18), transparent 56%),
+        radial-gradient(circle at 60% 95%, rgba(242,201,76,.18), transparent 56%);
+      transform: rotate(-8deg);
+      opacity: .9;
+      pointer-events:none;
+    }
+    .crgr-grid{
+      position: relative; z-index: 1;
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 14px;
+      align-items: start;
+    }
+    @media (max-width: 980px){ .crgr-grid{ grid-template-columns: 1fr; } }
+    .crgr-badge{
+      display:inline-flex; gap: 10px; align-items:center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(13,59,102,.14);
+      background: rgba(255,255,255,.64);
+      color: rgba(13,59,102,.92);
+      font-weight: 900;
+      font-size: 12px;
+      width: fit-content;
+      margin-bottom: 10px;
+    }
+    .crgr-badge svg{ width: 16px; height: 16px; color: var(--blue); }
+    .crgr-title{
+      font-family: Poppins, Inter, sans-serif;
+      letter-spacing: -.02em;
+      font-size: 26px;
+      margin: 0 0 8px;
+    }
+    .crgr-desc{
+      margin: 0;
+      color: rgba(35,35,35,.80);
+      font-size: 13.5px;
+      line-height: 1.65;
+      max-width: 72ch;
+    }
+    .crgr-right{
+      background: rgba(255,255,255,.62);
+      border: 1px solid rgba(13,59,102,.10);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 16px 38px rgba(13,59,102,.10);
+    }
+    .crgr-right strong{
+      display:block;
+      font-family: Poppins, Inter, sans-serif;
+      letter-spacing: -.02em;
+      margin-bottom: 8px;
+    }
+    .crgr-steps{ display:grid; gap: 10px; }
+    .step{
+      display:grid;
+      grid-template-columns: 44px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(13,59,102,.10);
+      background: rgba(255,255,255,.70);
+      transition: transform .18s ease, box-shadow .22s ease, border-color .22s ease;
+    }
+    .step:hover{ transform: translateY(-2px); box-shadow: 0 22px 60px rgba(13,59,102,.14); border-color: rgba(27,127,90,.18); }
+    .step-ico{
+      width: 44px; height: 44px;
+      border-radius: 16px;
+      display:grid; place-items:center;
+      background: rgba(27,127,90,.10);
+      border: 1px solid rgba(27,127,90,.18);
+    }
+    .step-ico svg{ width: 22px; height: 22px; color: var(--green); }
+    .step h4{ margin: 0 0 4px; font-size: 14px; letter-spacing: -.01em; }
+    .step p{ margin: 0; color: rgba(35,35,35,.78); font-size: 13px; line-height: 1.55; }
+
+    /* =======================
+       Seção 4: Dashboard
+       ======================= */
+    .dash{
+      margin-top: 8px;
+      border-radius: calc(var(--radius) + 12px);
+      border: 1px solid rgba(13,59,102,.10);
+      background: linear-gradient(135deg, rgba(255,255,255,.66), rgba(255,255,255,.52));
+      box-shadow: 0 22px 56px rgba(13,59,102,.12);
+      padding: 18px;
+      position: relative;
+      overflow:hidden;
+    }
+    .dash::before{
+      content:"";
+      position:absolute; inset:-180px;
+      background:
+        radial-gradient(circle at 20% 25%, rgba(13,59,102,.18), transparent 55%),
+        radial-gradient(circle at 85% 22%, rgba(76,175,143,.22), transparent 55%),
+        radial-gradient(circle at 60% 95%, rgba(242,201,76,.18), transparent 56%);
+      transform: rotate(-7deg);
+      opacity: .9;
+      pointer-events:none;
+    }
+    .dash-wrap{ position: relative; z-index: 1; display:grid; gap: 14px; }
+
+    .dash-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .dash-title{
+      font-family: Poppins, Inter, sans-serif;
+      letter-spacing: -.02em;
+      font-size: 26px;
+      margin: 0;
+    }
+    .dash-sub{
+      margin: 6px 0 0;
+      color: rgba(35,35,35,.78);
+      font-size: 13.5px;
+      line-height: 1.6;
+      max-width: 72ch;
+    }
+    .dash-actions{
+      display:flex; gap: 10px; flex-wrap: wrap; align-items:center;
+    }
+
+    .dash-badge{
+      display:inline-flex; gap: 10px; align-items:center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(27,127,90,.18);
+      background: rgba(27,127,90,.10);
+      color: var(--green);
+      font-weight: 900;
+      font-size: 12px;
+      width: fit-content;
+      margin-bottom: 10px;
+    }
+    .dash-badge svg{ width: 16px; height: 16px; }
+
+    .dash-grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 12px;
+      align-items: start;
+    }
+    @media (max-width: 980px){ .dash-grid{ grid-template-columns: 1fr; } }
+
+    .kpi-grid{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 980px){ .kpi-grid{ grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px){ .kpi-grid{ grid-template-columns: 1fr; } }
+
+    .kpi{
+      background: rgba(255,255,255,.70);
+      border: 1px solid rgba(13,59,102,.10);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: 0 18px 42px rgba(13,59,102,.10);
+      transition: transform .18s ease, box-shadow .22s ease, border-color .22s ease;
+    }
+    .kpi:hover{
+      transform: translateY(-3px);
+      box-shadow: 0 26px 70px rgba(13,59,102,.14);
+      border-color: rgba(27,127,90,.22);
+    }
+    .kpi-top{
+      display:flex; align-items:flex-start; justify-content: space-between; gap: 10px;
+      margin-bottom: 8px;
+    }
+    .kpi-ico{
+      width: 44px; height: 44px;
+      border-radius: 16px;
+      display:grid; place-items:center;
+      background: rgba(13,59,102,.08);
+      border: 1px solid rgba(13,59,102,.12);
+      flex: 0 0 auto;
+    }
+    .kpi-ico svg{ width: 22px; height: 22px; color: var(--blue); }
+
+    .kpi .label{
+      color: rgba(35,35,35,.78);
+      font-size: 12.5px;
+      margin: 0 0 2px;
+      font-weight: 700;
+      letter-spacing: -.01em;
+    }
+    .kpi .value{
+      font-family: Poppins, Inter, sans-serif;
+      letter-spacing: -.02em;
+      font-size: 24px;
+      margin: 0 0 6px;
+      line-height: 1.1;
+    }
+    .kpi .hint{
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .chip-status{
+      display:inline-flex; align-items:center; gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(13,59,102,.12);
+      background: rgba(255,255,255,.70);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .chip-status .b{
+      width: 8px; height: 8px; border-radius: 999px;
+      background: var(--green2);
+      box-shadow: 0 0 0 5px rgba(76,175,143,.18);
+    }
+    .chip-status.warn .b{ background: var(--warn); box-shadow: 0 0 0 5px rgba(217,119,6,.18); }
+    .chip-status.danger .b{ background: var(--danger); box-shadow: 0 0 0 5px rgba(225,29,72,.16); }
+
+    .panel{
+      background: rgba(255,255,255,.66);
+      border: 1px solid rgba(13,59,102,.10);
+      border-radius: calc(var(--radius));
+      padding: 14px;
+      box-shadow: 0 18px 42px rgba(13,59,102,.10);
+    }
+    .panel-head{
+      display:flex; align-items:center; justify-content: space-between; gap: 10px;
+      margin-bottom: 10px;
+    }
+    .panel-head strong{
+      font-family: Poppins, Inter, sans-serif;
+      letter-spacing: -.02em;
+      font-size: 14px;
+    }
+    .panel small{ color: var(--muted); font-weight: 700; }
+
+    .bar{
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(13,59,102,.10);
+      background: rgba(13,59,102,.06);
+      overflow:hidden;
+    }
+    .bar > i{
+      display:block;
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(27,127,90,.95), rgba(76,175,143,.95));
+      transition: width 1s ease;
+    }
+
+    .list{ display:grid; gap: 10px; margin-top: 12px; }
+    .row{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items:center;
+      padding: 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(13,59,102,.10);
+      background: rgba(255,255,255,.70);
+    }
+    .row strong{ font-size: 13px; letter-spacing: -.01em; }
+    .row span{ color: var(--muted); font-size: 12px; }
+
+    /* =======================
+       ✅ Seção 5: Pilares
+       ======================= */
+    .pillars{
+      margin-top: 8px;
+      border-radius: calc(var(--radius) + 12px);
+      border: 1px solid rgba(13,59,102,.10);
+      background: linear-gradient(135deg, rgba(255,255,255,.66), rgba(255,255,255,.52));
+      box-shadow: 0 22px 56px rgba(13,59,102,.12);
+      padding: 18px;
+      position: relative;
+      overflow:hidden;
+    }
+    .pillars::before{
+      content:"";
+      position:absolute; inset:-170px;
+      background:
+        radial-gradient(circle at 18% 30%, rgba(242,201,76,.20), transparent 55%),
+        radial-gradient(circle at 85% 25%, rgba(76,175,143,.22), transparent 55%),
+        radial-gradient(circle at 58% 95%, rgba(13,59,102,.16), transparent 56%);
+      transform: rotate(-8deg);
+      opacity: .9;
+      pointer-events:none;
+    }
+    .pillars-wrap{ position: relative; z-index: 1; display:grid; gap: 14px; }
+
+    .section-badge{
+      display:inline-flex; gap: 10px; align-items:center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(27,127,90,.18);
+      background: rgba(27,127,90,.10);
+      color: var(--green);
+      font-weight: 900;
+      font-size: 12px;
+      width: fit-content;
+    }
+    .section-badge svg{ width: 16px; height: 16px; }
+
+    .section-title{
+      font-family: Poppins, Inter, sans-serif;
+      letter-spacing: -.02em;
+      font-size: 26px;
+      margin: 8px 0 6px;
+    }
+    .section-sub{
+      margin: 0;
+      color: rgba(35,35,35,.78);
+      font-size: 13.5px;
+      line-height: 1.6;
+      max-width: 78ch;
+    }
+
+    .pillar-grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 10px;
+    }
+    @media (max-width: 980px){ .pillar-grid{ grid-template-columns: 1fr; } }
+
+    .pillar-card{
+      background: rgba(255,255,255,.70);
+      border: 1px solid rgba(13,59,102,.10);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 18px 42px rgba(13,59,102,.10);
+      transition: transform .18s ease, box-shadow .22s ease, border-color .22s ease;
+      position: relative;
+      overflow:hidden;
+    }
+    .pillar-card:hover{
+      transform: translateY(-3px);
+      box-shadow: 0 26px 70px rgba(13,59,102,.14);
+      border-color: rgba(27,127,90,.22);
+    }
+    .pillar-ico{
+      width: 48px; height: 48px;
+      border-radius: 18px;
+      display:grid; place-items:center;
+      background: rgba(27,127,90,.10);
+      border: 1px solid rgba(27,127,90,.18);
+      margin-bottom: 10px;
+    }
+    .pillar-ico svg{ width: 24px; height: 24px; color: var(--green); }
+    .pillar-card h3{
+      margin: 0 0 6px;
+      font-size: 15px;
+      letter-spacing: -.01em;
+    }
+    .pillar-card p{
+      margin: 0;
+      color: rgba(35,35,35,.78);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* =======================
+       ✅ Seção 6: Parcerias
+       ======================= */
+    .partners{
+      margin-top: 8px;
+      border-radius: calc(var(--radius) + 12px);
+      border: 1px solid rgba(13,59,102,.10);
+      background: linear-gradient(135deg, rgba(255,255,255,.66), rgba(255,255,255,.52));
+      box-shadow: 0 22px 56px rgba(13,59,102,.12);
+      padding: 18px;
+      position: relative;
+      overflow:hidden;
+    }
+    .partners::before{
+      content:"";
+      position:absolute; inset:-160px;
+      background:
+        radial-gradient(circle at 20% 25%, rgba(13,59,102,.18), transparent 55%),
+        radial-gradient(circle at 85% 22%, rgba(242,201,76,.18), transparent 55%),
+        radial-gradient(circle at 55% 95%, rgba(76,175,143,.20), transparent 56%);
+      transform: rotate(-7deg);
+      opacity: .9;
+      pointer-events:none;
+    }
+    .partners-wrap{ position: relative; z-index: 1; display:grid; gap: 12px; }
+
+    .logos{
+      display:grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media (max-width: 980px){ .logos{ grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 560px){ .logos{ grid-template-columns: repeat(2, 1fr); } }
+
+    .logo-tile{
+      height: 70px;
+      border-radius: 18px;
+      border: 1px dashed rgba(13,59,102,.18);
+      background: rgba(255,255,255,.70);
+      display:grid;
+      place-items:center;
+      color: rgba(13,59,102,.75);
+      font-weight: 900;
+      font-size: 12px;
+      letter-spacing: .02em;
+      transition: transform .18s ease, box-shadow .22s ease, border-color .22s ease;
+      user-select:none;
+    }
+    .logo-tile:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 22px 52px rgba(13,59,102,.12);
+      border-color: rgba(27,127,90,.22);
+    }
+
+    /* =======================
+       ✅ Seção 7: FAQ
+       ======================= */
+    .faq{
+      margin-top: 8px;
+      border-radius: calc(var(--radius) + 12px);
+      border: 1px solid rgba(13,59,102,.10);
+      background: linear-gradient(135deg, rgba(255,255,255,.66), rgba(255,255,255,.52));
+      box-shadow: 0 22px 56px rgba(13,59,102,.12);
+      padding: 18px;
+      position: relative;
+      overflow:hidden;
+    }
+    .faq::before{
+      content:"";
+      position:absolute; inset:-170px;
+      background:
+        radial-gradient(circle at 18% 30%, rgba(76,175,143,.20), transparent 55%),
+        radial-gradient(circle at 85% 25%, rgba(13,59,102,.18), transparent 55%),
+        radial-gradient(circle at 58% 95%, rgba(242,201,76,.18), transparent 56%);
+      transform: rotate(-8deg);
+      opacity: .9;
+      pointer-events:none;
+    }
+    .faq-wrap{ position: relative; z-index: 1; display:grid; gap: 12px; }
+
+    details{
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(13,59,102,.10);
+      border-radius: 18px;
+      padding: 12px 14px;
+      box-shadow: 0 14px 34px rgba(13,59,102,.10);
+      transition: transform .18s ease, box-shadow .22s ease, border-color .22s ease;
+    }
+    details:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 22px 52px rgba(13,59,102,.12);
+      border-color: rgba(27,127,90,.22);
+    }
+    summary{
+      cursor: pointer;
+      list-style: none;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      font-weight: 900;
+      font-size: 13.5px;
+      letter-spacing: -.01em;
+    }
+    summary::-webkit-details-marker{ display:none; }
+    .chev{
+      width: 30px; height: 30px;
+      border-radius: 12px;
+      border: 1px solid rgba(13,59,102,.12);
+      background: rgba(255,255,255,.78);
+      display:grid; place-items:center;
+      transition: transform .2s ease;
+      flex: 0 0 auto;
+    }
+    details[open] .chev{ transform: rotate(180deg); }
+    .faq p{
+      margin: 10px 0 0;
+      color: rgba(35,35,35,.78);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    /* Footer */
+    footer{
+      margin-top: 26px;
+      padding: 18px 0 0;
+      color: rgba(35,35,35,.70);
+      font-size: 12.5px;
+    }
+    .footer-row{
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-top: 14px;
+      border-top: 1px solid rgba(13,59,102,.10);
+    }
+    .footer-row a{
+      color: rgba(35,35,35,.76);
+      text-decoration:none;
+      font-weight: 800;
+    }
+    .footer-row a:hover{ color: var(--green); }
+
+    /* =======================
+       ✅ MOBILE FIX (TOPBAR + HERO)
+       ======================= */
+
+    /* Remove "min-width" rígido no mobile */
+    @media (max-width: 860px){
+      .topbar .inner{
+        padding: 12px 14px;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .brand{ min-width: 0; flex: 1 1 auto; }
+      .actions{ min-width: 0; flex: 0 0 auto; justify-content: flex-end; }
+
+      /* Nav vira "drawer" abaixo da linha principal */
+      nav{
+        width: 100%;
+        justify-content: flex-start;
+        gap: 8px;
+        display: none;             /* fechado por padrão */
+        padding: 10px 0 4px;
+      }
+      nav.open{ display:flex; }
+    }
+
+    
+
+/* Botão de menu (hamburger) */
+.menu-btn{
+  display:none; /* ✅ por padrão: escondido no desktop */
+  border: 1px solid rgba(13,59,102,.12);
+  background: rgba(255,255,255,.72);
+  color: rgba(35,35,35,.9);
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-weight: 900;
+  font-size: 13px;
+  cursor: pointer;
+  align-items:center;
+  gap: 10px;
+  user-select:none;
+}
+
+/* Só mostra o botão no mobile */
+@media (max-width: 860px){
+  .menu-btn{ display:flex; }
+}
+
+
+    /* Ajustes finos de tipografia e hero no mobile */
+    @media (max-width: 560px){
+      .container{ padding: 18px 14px 74px; }
+
+      .mark{ width: 34px; height: 34px; border-radius: 11px; }
+      .brand strong{ font-size: 13px; }
+      .brand span{ font-size: 11.5px; }
+
+      .btn{ padding: 10px 12px; border-radius: 14px; }
+      .btn-primary{ width: auto; }
+
+      .hero{
+        padding: 16px 0 10px;
+        gap: 14px;
+      }
+      .hero-card{ padding: 18px; }
+      h1{ font-size: 32px; }
+
+      .logo-hero{
+        min-height: 300px;
+        border-radius: calc(var(--radius) + 6px);
+      }
+      .logo-img{
+        width: min(420px, 92%);
+      }
+
+      /* desliga glow no touch (evita "lag") */
+      .cursor-glow{ display:none; }
+    }
+
+    /* =========================
+       ✅ Mobile/UX Fixes (Index)
+       ========================= */
+
+    /* 1) Cursor glow: desliga em telas touch (melhor que só largura) */
+    @media (pointer: coarse){
+      .cursor-glow{ display:none !important; }
+    }
+
+    /* 2) Topbar: melhora layout e espaçamento no mobile */
+    @media (max-width: 860px){
+      .topbar .inner{
+        position: relative;
+      }
+      .actions{
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .actions .btn{
+        width: 100%;
+        justify-content: center;
+      }
+
+      /* Nav como dropdown com "card" */
+      nav{
+        width: 100%;
+        border-radius: 16px;
+        border: 1px solid rgba(13,59,102,.10);
+        background: rgba(255,255,255,.86);
+        box-shadow: 0 18px 38px rgba(13,59,102,.12);
+        padding: 10px;
+      }
+      .navlink{
+        width: 100%;
+        display:flex;
+        justify-content: space-between;
+        padding: 12px 12px;
+      }
+      .navlink::after{ display:none; }
+    }
+
+    /* 3) Hero: refinamento visual e altura do bloco da logo */
+    @media (max-width: 980px){
+      .hero-card{ padding: 20px; }
+      .logo-hero{ min-height: 320px; }
+    }
+    @media (max-width: 560px){
+      h1{ font-size: 30px; }
+      .lead{ font-size: 14px; }
+      .logo-hero{ min-height: 260px; }
+    }
+
+    /* 4) Cards: reduz “peso” e melhora toque */
+    @media (max-width: 560px){
+      .aud-card, .pillar-card, .panel, details{
+        box-shadow: 0 10px 22px rgba(13,59,102,.10);
+      }
+    }
+
+    /* 5) melhora foco teclado */
+    .navlink:focus, .btn:focus, .menu-btn:focus{
+      outline: 3px solid rgba(242,201,76,.55);
+      outline-offset: 2px;
+    }
+    /* CTA do dashboard (opcional) */
+#btnDashboard{
+  border: 1px solid rgba(13,59,102,.16);
+  background: rgba(255,255,255,.74);
+}
+#btnDashboard:hover{
+  box-shadow: 0 18px 32px rgba(13,59,102,.12);
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="bg-grid"></div>
+  <div class="noise"></div>
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <header class="topbar" role="banner">
+    <div class="inner">
+      <a class="brand" href="#top" aria-label="Ir para o topo">
+        <div class="mark" aria-hidden="true"></div>
+        <div>
+          <strong>Hub Resiliência Climática</strong>
+          <span>Plataforma • Territórios & CRGR</span>
+        </div>
+      </a>
+
+      <!-- ✅ Botão menu (mobile) -->
+      <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="mainNav">
+        <span class="menu-ico" aria-hidden="true">≡</span>
+        Menu
+      </button>
+
+      <nav id="mainNav" aria-label="Navegação principal">
+        <a class="navlink" href="#top">Início</a>
+        <a class="navlink" href="quem-somos.html">Quem Somos</a>
+        <a class="navlink" href="#para-quem">Conteúdos</a>
+        <a class="navlink" href="#dados">Dados e Relatórios</a>
+        <a class="navlink" href="#faq">FAQ</a>
+      </nav>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="btnEntrar" type="button">
+          Cadastrar / Login <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top" class="container">
+    <!-- =======================
+         SEÇÃO 1 — HERO
+         ======================= -->
+    <section aria-label="Seção inicial">
+      <div class="hero">
+        <div class="hero-card" data-reveal>
+          <h1>Um Hub para estabelecer a <strong>Resiliência climática</strong> em Porto Alegre</h1>
+
+          <p class="lead">
+            O Hub Resiliência Climática é um ponto de encontro digital que conecta cooperativas, comunidades, técnicos e gestores públicos.
+            Aqui você encontra apoio prático para fortalecer a reciclagem, a economia circular e a resposta aos desafios climáticos nos territórios.
+          </p>
+
+          <!-- ✅ CTAs (não altera texto, só melhora interação) -->
+          <div class="hero-cta">
+            <button class="btn btn-primary" id="btnScroll2" type="button">
+              Ver conteúdos <span aria-hidden="true">→</span>
+            </button>
+            <button class="btn btn-ghost" id="btnCadastrar" type="button">
+              Entrar no Hub <span aria-hidden="true">↗</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="logo-hero" data-reveal aria-label="Logo do projeto">
+          <div class="logo-container">
+            <img class="logo-img" src="img/Design sem nome (4) (1).png" alt="Hub Resiliência Climática" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================
+         SEÇÃO 2 — PARA QUEM É
+         ======================= -->
+    <section id="para-quem" class="audience" aria-label="Para quem é o Hub" data-reveal>
+      <div class="audience-grid">
+        <div class="audience-top">
+          <div>
+            <h2 class="audience-title">O Hub é para quem atua ou se importa com o território</h2>
+          </div>
+        </div>
+
+        <div class="audience-cards" aria-label="Perfis do hub">
+          <article class="aud-card">
+            <div class="aud-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M7 7l3-5 3 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10 2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M17 9l5 3-5 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M7 15l-5 3 5 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3>Cooperativas de triagem</h3>
+            <p>Boas práticas, instrumentos e apoio para fortalecer operação, gestão e organização territorial.</p>
+          </article>
+
+          <article class="aud-card">
+            <div class="aud-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M9 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke="currentColor" stroke-width="2"/>
+                <path d="M22 21v-2a3.5 3.5 0 0 0-2.5-3.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Cidadãos & lideranças</h3>
+            <p>Informação simples, mobilização local e caminhos para participação e ação coletiva.</p>
+          </article>
+
+          <article class="aud-card">
+            <div class="aud-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M3 21h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M6 21V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v14" stroke="currentColor" stroke-width="2"/>
+                <path d="M9 9h2M13 9h2M9 13h2M13 13h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Gestores & técnicos</h3>
+            <p>Dados, relatórios, modelos e governança para planejar e acompanhar ações por território/CRGR.</p>
+          </article>
+
+          <article class="aud-card">
+            <div class="aud-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 22s8-4 8-10V6l-8-4-8 4v6c0 6 8 10 8 10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M12 9v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Brigadistas & resposta climática</h3>
+            <p>Protocolos, materiais e organização local para apoiar antes, durante e depois de eventos climáticos.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================
+         SEÇÃO 3 — CRGR
+         ======================= -->
+    <section id="crgr" class="crgr" aria-label="O que é CRGR" data-reveal>
+      <div class="crgr-grid">
+        <div>
+          <div class="crgr-badge">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 22s7-5 7-12a7 7 0 0 0-14 0c0 7 7 12 7 12Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M12 11a2 2 0 1 0-2-2 2 2 0 0 0 2 2Z" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            CRGR no território
+          </div>
+
+          <h2 class="crgr-title">CRGR é o Centro de Referência na Gestão de Resíduos.</h2>
+          <p class="crgr-desc">
+            É um espaço local que apoia a comunidade <strong>antes, durante e depois</strong> de eventos climáticos,
+            fortalecendo a reciclagem, a organização do território e a resposta a emergências.
+            <br><br>
+            O <strong>Hub conecta esses centros</strong>, organiza informações e dá suporte técnico contínuo para que a rede funcione melhor,
+            com mais coordenação e agilidade.
+          </p>
+        </div>
+
+        <aside class="crgr-right" aria-label="Como funciona na prática">
+          <strong>Na prática, o CRGR ajuda a:</strong>
+
+          <div class="crgr-steps">
+            <div class="step">
+              <div class="step-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div>
+                <h4>Prevenção e preparação</h4>
+                <p>Organizar rotinas, fluxos e materiais para reduzir impacto em momentos críticos.</p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 9v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M10.3 3.6 2.2 18a2 2 0 0 0 1.7 3h16.2a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div>
+                <h4>Resposta a emergências</h4>
+                <p>Ativar informações e coordenação local para agir com mais rapidez e clareza.</p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 15.5a3.5 3.5 0 1 0-3.5-3.5 3.5 3.5 0 0 0 3.5 3.5Z" stroke="currentColor" stroke-width="2"/>
+                  <path d="M19.4 15a7.8 7.8 0 0 0 .1-2l2-1.2-2-3.5-2.3.7a7.7 7.7 0 0 0-1.7-1l-.3-2.4H9.8l-.3 2.4a7.7 7.7 0 0 0-1.7 1l-2.3-.7-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 2l-2 1.2 2 3.5 2.3-.7a7.7 7.7 0 0 0 1.7 1l.3 2.4h4.4l.3-2.4a7.7 7.7 0 0 0 1.7-1l2.3.7 2-3.5-2-1.2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div>
+                <h4>Recuperação e continuidade</h4>
+                <p>Retomar serviços, fortalecer reciclagem e registrar aprendizados com suporte técnico contínuo.</p>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- =======================
+         SEÇÃO 4 — DASHBOARD
+         ======================= -->
+    <section id="dados" class="dash" aria-label="Dashboard de dados e relatórios" data-reveal>
+      <div class="dash-wrap">
+        <div>
+          <div class="dash-badge">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 19V5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M4 19h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M8 15v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 15V8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M16 15v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Dados & Relatórios
+          </div>
+
+          <div class="dash-head">
+  <div>
+    <h2 class="dash-title">Resultados que importam</h2>
+    <p class="dash-sub">
+      Números que ajudam a entender como os territórios estão avançando na gestão de resíduos
+    </p>
+  </div>
+
+  <div class="dash-actions">
+    <a class="btn btn-ghost" id="btnDashboard" href="dashboard.html">
+      Ver dashboard completo <span aria-hidden="true">↗</span>
+    </a>
+  </div>
+</div>
+
+        </div>
+
+        <div class="dash-grid">
+          <div class="kpi-grid" aria-label="Indicadores principais">
+            <div class="kpi">
+              <div class="kpi-top">
+                <div>
+                  <p class="label">CRGR ativos</p>
+                  <p class="value"><span class="kcount" data-count="12">0</span></p>
+                </div>
+                <div class="kpi-ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 22s7-5 7-12a7 7 0 0 0-14 0c0 7 7 12 7 12Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M12 11a2 2 0 1 0-2-2 2 2 0 0 0 2 2Z" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </div>
+              </div>
+              <p class="hint">Centros conectados no Hub (últimos 30 dias).</p>
+            </div>
+
+            <div class="kpi">
+              <div class="kpi-top">
+                <div>
+                  <p class="label">Usuários cadastrados</p>
+                  <p class="value"><span class="kcount" data-count="684">0</span></p>
+                </div>
+                <div class="kpi-ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M9 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M22 21v-2a3.5 3.5 0 0 0-2.5-3.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <p class="hint">Cooperativas, cidadãos, técnicos, gestores e brigadistas.</p>
+            </div>
+
+            <div class="kpi">
+              <div class="kpi-top">
+                <div>
+                  <p class="label">Planos em andamento</p>
+                  <p class="value"><span class="kcount" data-count="38">0</span></p>
+                </div>
+                <div class="kpi-ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M9 5H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M9 5a3 3 0 0 0 6 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M9 12h6M9 16h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <p class="hint">Metas e prazos sendo acompanhados pelos territórios.</p>
+            </div>
+
+            <div class="kpi">
+              <div class="kpi-top">
+                <div>
+                  <p class="label">Indicadores em alerta</p>
+                  <p class="value"><span class="kcount" data-count="5">0</span></p>
+                </div>
+                <div class="kpi-ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 9v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M10.3 3.6 2.2 18a2 2 0 0 0 1.7 3h16.2a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+              <p class="hint">Itens críticos que pedem atenção e coordenação.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================
+         ✅ SEÇÃO 5 — PILARES
+         ======================= -->
+    <section id="pilares" class="pillars" aria-label="Pilares do Hub" data-reveal>
+      <div class="pillars-wrap">
+        <div class="section-badge">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 21h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M6 21V7h4v14" stroke="currentColor" stroke-width="2"/>
+            <path d="M14 21V7h4v14" stroke="currentColor" stroke-width="2"/>
+            <path d="M5 7h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M7 3h10v4H7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+          Pilares do Hub
+        </div>
+
+        <div class="pillar-grid" aria-label="Cards dos pilares">
+          <article class="pillar-card">
+            <div class="pillar-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M7 7l3-5 3 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10 2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M17 9l5 3-5 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M7 15l-5 3 5 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3>Reciclagem & Economia Circular</h3>
+            <p>Boas práticas, conteúdos e instrumentos para fortalecer a cadeia da reciclagem.</p>
+          </article>
+
+          <article class="pillar-card">
+            <div class="pillar-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 19a2 2 0 0 0 2 2h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M6 3h12v18H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M9 7h6M9 11h6M9 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Formação & Governança</h3>
+            <p>Trilhas formativas, perfis de acesso e gestão colaborativa dos territórios.</p>
+          </article>
+
+          <article class="pillar-card">
+            <div class="pillar-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 22s7-5 7-12a7 7 0 0 0-14 0c0 7 7 12 7 12Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M12 11a2 2 0 1 0-2-2 2 2 0 0 0 2 2Z" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </div>
+            <h3>Territórios / CRGR</h3>
+            <p>Espaços próprios com planos de ação, dados e materiais de cada território.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================
+         ✅ SEÇÃO 6 — PARCERIAS
+         ======================= -->
+    <section id="parcerias" class="partners" aria-label="Parcerias" data-reveal>
+      <div class="partners-wrap">
+        <div class="section-badge">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M8 12l2 2a3 3 0 0 0 4 0l3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 9l3-3a3 3 0 0 1 4 0l1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19 9l-3-3a3 3 0 0 0-4 0l-1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M22 12l-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Parcerias
+        </div>
+
+        <h2 class="section-title">Construído em rede</h2>
+        <p class="section-sub">
+          O Hub Resiliência Climática é construído em parceria com instituições, redes e apoiadores comprometidos com o desenvolvimento territorial,
+          a justiça climática e a economia circular.
+        </p>
+
+        <div class="logos" aria-label="Logos de parceiros">
+          <div class="logo-tile">Mãos verdes</div>
+          <div class="logo-tile">Hélice</div>
+          <div class="logo-tile">VAUS</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================
+         ✅ SEÇÃO 7 — FAQ
+         ======================= -->
+    <section id="faq" class="faq" aria-label="Dúvidas frequentes" data-reveal>
+      <div class="faq-wrap">
+        <div class="section-badge">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 21a9 9 0 1 0-9-9 9 9 0 0 0 9 9Z" stroke="currentColor" stroke-width="2"/>
+            <path d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-.9.7-1.2 1-1.2 2.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Dúvidas frequentes
+        </div>
+
+        <h2 class="section-title">Perguntas comuns</h2>
+        <p class="section-sub">Respostas rápidas para orientar o uso do Hub e como ele se organiza por território/CRGR.</p>
+
+        <details>
+          <summary>
+            Quem pode acessar a plataforma?
+            <span class="chev" aria-hidden="true">⌄</span>
+          </summary>
+          <p>
+           Qualquer pessoa pode acessar os indicadores gerais. Para ter um Perfis cadastrados, é necessário que o territorio tenha um CRGR.
+
+          </p>
+        </details>
+
+        <details>
+          <summary>
+            Esses dados podem apoiar políticas públicas?
+            <span class="chev" aria-hidden="true">⌄</span>
+          </summary>
+          <p>
+            Sim. Os dados ajudam no diagnóstico, planejamento e monitoramento de ações e políticas públicas.
+
+          </p>
+        </details>
+
+        <details>
+          <summary>
+            Quem alimenta os dados da plataforma?
+            <span class="chev" aria-hidden="true">⌄</span>
+          </summary>
+          <p>
+           Cooperativas, equipes técnicas, gestores públicos e parceiros do projeto.
+
+          </p>
+        </details>
+
+        <details>
+          <summary>
+            Com que frequência os dados são atualizados?
+            <span class="chev" aria-hidden="true">⌄</span>
+          </summary>
+          <p>
+           Periodicamente, conforme envio e validação das informações.
+
+          </p>
+        </details>
+
+        <details>
+          <summary>
+            O que representam os indicadores apresentados?
+            <span class="chev" aria-hidden="true">⌄</span>
+          </summary>
+          <p>
+            Mostram a atuação dos CRGRs, o engajamento das famílias e os volumes de materiais reciclados e rejeitos.
+          </p>
+        </details>
+
+        <details>
+          <summary>
+            Sou uma cooperativa: como posso me envolver?
+            <span class="chev" aria-hidden="true">⌄</span>
+          </summary>
+          <p>
+           Entre em contato conosco pelo email: queroumCRGR@hub.br 
+          </p>
+        </details>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-row">
+        <div>
+          <strong>Hub Resiliência Climática</strong> • Plataforma Regenera
+          <div style="margin-top:6px;">© <span id="year"></span> • Todos os direitos reservados.</div>
+        </div>
+        <div style="display:flex; gap:14px; flex-wrap:wrap;">
+          <a href="#top">Voltar ao topo</a>
+          <a href="#parcerias">Parcerias</a>
+          <a href="#faq">FAQ</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    // Cursor glow
+    const glow = $("#cursorGlow");
+    const motionOK = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    if (motionOK && !coarsePointer){
+      window.addEventListener("mousemove", (e) => {
+        glow.style.left = e.clientX + "px";
+        glow.style.top = e.clientY + "px";
+        glow.style.opacity = "1";
+      });
+      window.addEventListener("mouseleave", () => glow.style.opacity = "0");
+    }
+
+    // Reveal on scroll
+    const revealEls = $$("[data-reveal]");
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting){
+          entry.target.classList.add("in");
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(el => io.observe(el));
+
+    // Smooth scroll
+    $$('a[href^="#"]').forEach(a => {
+      a.addEventListener("click", (e) => {
+        const id = a.getAttribute("href");
+        const target = document.querySelector(id);
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+
+    // Counters (corrigido: .kcount)
+    const heroCounters = $$(".kcount");
+    let heroCounted = false;
+    function animateCounters(list){
+      list.forEach(el => {
+        const end = Number(el.dataset.count || "0");
+        const duration = 900 + Math.random() * 450;
+        const t0 = performance.now();
+        function tick(t){
+          const p = Math.min((t - t0) / duration, 1);
+          const eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = String(Math.round(end * eased));
+          if (p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+    const heroCard = document.querySelector(".hero-card");
+    new IntersectionObserver((entries, obs) => {
+      if (!heroCounted && entries.some(e => e.isIntersecting)){
+        heroCounted = true;
+        animateCounters(heroCounters);
+        obs.disconnect();
+      }
+    }, { threshold: 0.3 }).observe(heroCard);
+
+    // CTA scroll
+    $("#btnScroll2")?.addEventListener("click", () => {
+      document.querySelector("#para-quem")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    // Login buttons -> abre a página de login
+    const goLogin = () => window.location.href = "login.html";
+    $("#btnEntrar")?.addEventListener("click", goLogin);
+    $("#btnCadastrar")?.addEventListener("click", goLogin);
+
+    // Footer year
+    $("#year").textContent = new Date().getFullYear();
+
+    // ===== Mobile menu toggle (robusto) =====
+    const menuBtn = document.querySelector("#menuBtn");
+    const mainNav = document.querySelector("#mainNav");
+
+    function isMobileNav(){
+      return window.matchMedia("(max-width: 860px)").matches;
+    }
+    function closeMenu(){
+      if(!mainNav || !menuBtn) return;
+      mainNav.classList.remove("open");
+      menuBtn.setAttribute("aria-expanded", "false");
+    }
+    function openMenu(){
+      if(!mainNav || !menuBtn) return;
+      mainNav.classList.add("open");
+      menuBtn.setAttribute("aria-expanded", "true");
+    }
+    function toggleMenu(){
+      if(!mainNav || !menuBtn) return;
+      const willOpen = !mainNav.classList.contains("open");
+      willOpen ? openMenu() : closeMenu();
+    }
+
+    menuBtn?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    // Fecha ao clicar em QUALQUER link do nav (inclui quem-somos.html)
+    mainNav?.querySelectorAll("a").forEach(a => {
+      a.addEventListener("click", () => {
+        if (isMobileNav()) closeMenu();
+      });
+    });
+
+    // Fecha ao clicar fora
+    document.addEventListener("click", (e) => {
+      if(!isMobileNav()) return;
+      if(!mainNav?.classList.contains("open")) return;
+
+      const clickedInsideNav = mainNav.contains(e.target);
+      const clickedMenuBtn = menuBtn?.contains(e.target);
+      if(!clickedInsideNav && !clickedMenuBtn) closeMenu();
+    });
+
+    // Fecha no ESC
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "Escape") closeMenu();
+    });
+
+    // Fecha ao redimensionar para desktop
+    window.addEventListener("resize", () => {
+      if (!isMobileNav()) closeMenu();
+    });
+  </script>
+</body>
+</html>
               regen: {
                 green: "#1B7F5A",
                 greenLight: "#4CAF8F",
